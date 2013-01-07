@@ -198,7 +198,8 @@ int start()
   int  i,Ncomp,Nqueue;
   double tau_equi, tau_prod;
   long steps_equi, steps_prod;
-  char dummy[40];
+  char *dummy;
+  dummy = (char*) malloc(40);
   FILE *fp;
 
   // load general information from Gillespie.inp
@@ -267,7 +268,7 @@ int start()
   read_components();
   read_reactions();
   get_reaction_network();
-
+  
   // check, if the state of the system has to be loaded from a file
   if( sys.input != NULL )
   {
@@ -290,7 +291,7 @@ int start()
     
     for( i=0; i<Ncomp; i++ )
     {
-      fscanf( fp, "%d\t%s", &X[i], &dummy );
+      fscanf( fp, "%d\t%s", &X[i], dummy );
     }
     
     queue_read( fp, Nqueue, sys.tau_init );
@@ -385,25 +386,29 @@ void allocate_memory ()
   react_count = calloc( sys.Nreact, sizeof(long long int) );
   a = malloc( sys.Nreact*sizeof(double) );
   gdr = malloc( sys.Nreact*sizeof(int) );
-  for( i=0; i<sys.Nreact; ++i )
+  for( i=0; i<sys.Nreact; i++ )
+  {
     a[i] = 0.;
-	  gdr[i] = 0. ;
-
+	  gdr[i] = 0.;
+  }
+  
   // variables used to describe the components
   X           = calloc( sys.Ncomp, sizeof(int) );
   Xname       = calloc( sys.Ncomp, sizeof(char *) );
   Xconst      = calloc( sys.Ncomp, sizeof(boolean) );
   Xcalc       = calloc( sys.Ncomp, sizeof(int *) );
   Xcalc_count = calloc( sys.Ncomp, sizeof(int) );
+
   for( i=0; i<sys.Ncomp; ++i ) 
     Xname[i] = calloc( MAXNAMELENGTH, sizeof(char) );
-  
+   
   // output stats system
   if( sys.output_stats )
   {
     Xblk  = calloc( sys.Ncomp, sizeof(Stats) );
     Xrun  = calloc( sys.Ncomp, sizeof(Stats) );
   }
+  
 }
 
 

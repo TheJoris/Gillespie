@@ -55,7 +55,7 @@ void read_components()
 void read_reactions()
 {
   int  i,j,Nreact;
-  char filename[40],dummy[40];
+  char filename[40],dummy[80];
   FILE *fp;
 
   // determine filename and open the file
@@ -79,7 +79,7 @@ void read_reactions()
     else 
     {
       // read in all reactions
-      for( i=0; i<sys.Nreact; i++ ) 
+      for( i=0; i<sys.Nreact; i++ )
       {
         
         fscanf( fp, "%lg %d %d %lg %lg %d %lg %lg %s\n",

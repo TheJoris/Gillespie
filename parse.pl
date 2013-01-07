@@ -664,7 +664,7 @@ sub WriteComponentFile
 # as appropriate.
 sub WriteGillespieInp 
 {
-  printf "%i\t\t\tName\n",$codename;
+  printf "%s\t\t\tName\n",$codename;
   printf "%i\t\t\tNumber_of_components\n",scalar(@name_list);
   printf "%i\t\t\tNumber_of_reactions\n",scalar(@react1lines);
   printf "%i\t%i\t%i\tNumber_eq_blocks;_Number_prod_blocks;_Number_steps\n",
