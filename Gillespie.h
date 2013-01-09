@@ -18,7 +18,7 @@
 
 
 #define EQUIL       0
-#define RUN         1
+#define RUN         0
 
 #define MAXPROD         10 ///< maximum number of products in one reaction
 #define MAXNAMELENGTH   30
