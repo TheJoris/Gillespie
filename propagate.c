@@ -62,9 +62,9 @@ void run( int run, double total_time, long total_steps )
   // initialize growth, if neccessary
   if( HAS_GROWTH )
   {  
-	growth_dependent_reactions();
-	growth_init();
- 	last_volume_update = sys.tau - 2.*growth_dt; // make sure, volume is set before first calculation
+	  growth_dependent_reactions();
+	  growth_init();
+ 	  last_volume_update = sys.tau - 2.*growth_dt; // make sure, volume is set before first calculation
   }
   else
   {
@@ -82,12 +82,9 @@ void run( int run, double total_time, long total_steps )
     // check if volume should be updated
     if( HAS_GROWTH && last_volume_update + growth_dt <= sys.tau )
     {
-      // update volume and divide if necessary
+      // Update volume and divide if necessary,
+	    // influenced propensities are updated.
       growth_step();
-      
-      // determine only those propensity functions which chance under growth
-	update_propensity_functions( gdr, gdrl );
-      
       last_volume_update = sys.tau;
     }
     
@@ -188,13 +185,12 @@ void run( int run, double total_time, long total_steps )
       }
     }
     
-//    calculate_components();						//temporarily knocked out because it does not appear to have any function
-									//and it is not called
+    //calculate_components();						//knocked out
   }
 
   // output statistics about the whole run
   analyse_finish(run);
-//   run_finish(run);
+  //run_finish(run);
   
   // shift origin of time for the next run to current end
   sys.tau_init = sys.tau;
@@ -214,10 +210,9 @@ void determine_propensity_functions()
   for( i=0; i<sys.Nreact; ++i )
     ids[i] = i;
   
-//  calculate_components();						//temporarily knocked out because it does not appear to have any function
-									//and it is not called
+  //calculate_components();						//knocked out
     
-// calculate all propensity functions
+  // calculate all propensity functions
   update_propensity_functions( ids, sys.Nreact );
   
   free( ids );
@@ -461,7 +456,7 @@ void growth_step()
   if( sys.volume >= 2. * volume_min )
   {
 
-		//hier moet die productiesnelheid dan weer gehalveert worden		
+	//hier moet die productiesnelheid dan weer gehalveert worden		
 	
     // reduce the volume
     sys.volume *= 0.5;
@@ -482,7 +477,7 @@ void growth_step()
           abort();
         }
       }
-	determine_propensity_functions() ;
+	  //determine_propensity_functions(); //FOUT
     }
   
     // disregard half the items on the queue
@@ -490,9 +485,16 @@ void growth_step()
     {
       queue_disregard_randomly( 0.5 );
     }
+
+	  //Update all propensities.
+	  determine_propensity_functions();
     
-    // initialize the next growth period
+    //initialize the next growth period
     growth_init();
+  }
+  else{ //Volume has grown but dit not divide.
+	  //Only update those propensities which change under growth
+    update_propensity_functions( gdr, gdrl );
   }
 }
 

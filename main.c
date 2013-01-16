@@ -389,7 +389,7 @@ void allocate_memory ()
   for( i=0; i<sys.Nreact; i++ )
   {
     a[i] = 0.;
-	  gdr[i] = 0.;
+	gdr[i] = 0.;
   }
   
   // variables used to describe the components
@@ -608,13 +608,13 @@ void get_reaction_network()
       c[R[i].prod[m].index] += R[i].prod[m].change;
     
     // print output
-	if(i == 1)
-	{
-    for( m=0; m<sys.Ncomp; m++ )
-      if( c[m] != 0 )
-        printf( "%s (%d), ", Xname[m], c[m] );
-    printf( "\nand reactions: " );
-	}
+	  if(i == 1)
+	  {
+      for( m=0; m<sys.Ncomp; m++ )
+        if( c[m] != 0 )
+          printf( "%s (%d), ", Xname[m], c[m] );
+      printf( "\nand reactions: " );
+	  }
     
     // find all reaction which are influenced by those components
     for( j=0; j<sys.Nreact; j++ )

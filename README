@@ -1,0 +1,108 @@
+About this package
+========================
+
+Gillespie is a software package for simulating stochastic chemical 
+reactions. The following functionality is included:
+
+1. Reactions via the Gillespie algorithm.
+2. Delayed reactions: products appear a specified time after the
+reaction took place.
+3. The reaction volume V can grow and divide after a user set time 
+to simulate the growing and division of cells.
+
+
+Authors
+========================
+[Unknown]
+David Zwicker @ FOM Institute AMOLF
+Mark Bosman @ FOM Institute AMOLF
+
+License
+========================
+
+This package is distributed under the terms of GNU General Public License
+version 2.  See COPYING.
+
+
+Files in this package
+========================
+
+1. README         : This file.
+2. COPYING        : GNU license.
+3. parse.pl       : Perle script for parsing a model file to input files for the 
+                    Gillespie software.
+4. kai_analyses.pl: Generate data specific for the kai model. (Specified in kaiABC.mdl)
+                    Use by typing: ./kai_analyses.pl <model_name>
+                    inside the models directory.
+5. kaiABC.mdl     : Example model file for the kai circadian oscillator.
+6. Makefile       : makefile to compile the program.
+7. Makefile.*     : makefiles which specify the paths to the required libraries.
+8. .c,.h          : C source files for the Gillespie program.
+
+
+
+Prerequisites
+========================
+
+1. C compiler (gcc)
+2. C standard libraries
+3. GNU make
+3. Perl
+
+
+Installing and Building
+========================
+Create a directory where you want the files to go
+
+./mkdir <directory_name>
+
+Extract the archive to the directory
+
+./tar -zxvf Gillespie.tar.gz -C <directory_name>
+
+To make the program, first edit the top line of Makefile (./Makefile) 
+such that it includes the correct makefile for your system. This file
+specifies the paths to the required libaries. Then type
+
+1. ./make clean
+2. ./make all
+
+This should compile all the source files and return an executable called
+'Gillespie'.
+
+
+Create and parse a model
+========================
+
+First you need a model file. A describtion on how to define components and reactions for a 
+chemical model is given by typing:
+
+./parse --help
+
+An example model file (for the kai circadian oscillator) is 
+given in 'kaiABC.mdl'.
+
+The model file needs to be parsed such that it can be read by the program. 
+To parse the model file, type:
+
+./parse.pl <model_file> > Gillespie.inp
+
+This creates <input_file>.components, <input_file>.reactions
+and Gillespie.inp, which are all used by the Gillespie program. Because 
+the Gillespie program will generate a lot of output files, it is a good 
+idea to put these files in a seperate directory, and run the software from
+here.
+
+
+Running
+========================
+When <input_file>.components, <input_file>.reactions and Gillespie.inp 
+files are present (see 'Create and parse a model'), you can propegate 
+your model by typing:
+
+./Gillespie <input_file>
+
+(chmod 744 Gillespie to make file executable)
+
+When the simulator is finished, it will create a file for each component 
+in the system containing a timetrace of the number of particles.

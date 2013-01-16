@@ -76,7 +76,7 @@ also declares components, which are now to be taken as constant during
 cell division.
 
 6. A line of the type
- <component> <equals> <val> : init 
+ <component> <equals> <val> : initial 
 causes <component> name to have a initial value <val> (default 0).  
 The separator <equals> can be anything.
 
