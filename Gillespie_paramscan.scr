@@ -1,0 +1,37 @@
+#!/bin/bash
+
+INPUT_FILE=$1
+PROJECT_NAME=`echo $INPUT_FILE | sed 's/\([A-Za-z_-]*\).*/\1/'`
+OUTPUT_FILE=`pwd`"/"$PROJECT_NAME".dat"
+
+K_NUMBER=( 1 2 4 8 16 32 64 128 256 512 1024 )
+PARAM_NBR=${#K_NUMBER[@]}
+
+#Count number of lines in file.
+#N=`wc -l $file | awk '{print $1}'`
+
+echo $PARAM_NBR "simulations on roll, writing data to:" $OUTPUT_FILE
+
+for i in `seq 1 $PARAM_NBR`
+do
+
+  RUN_DIR=$PROJECT_NAME"_"$i
+  RUN_MDL=$PROJECT_NAME"_"$i".mdl"
+  RUN_LOG=$PROJECT_NAME"_"$i".log" 
+
+  mkdir $RUN_DIR
+  j=`expr $i - 1`
+
+  sed 's/K[ \t]*==[ \t]*[0-9]*.[0-9]*/K == '${K_NUMBER[$j]}'/' <$INPUT_FILE > ./$RUN_DIR/$RUN_MDL
+
+  cd $RUN_DIR
+
+  Gillespie_parse $RUN_MDL > Gillespie.inp
+  Gillespie $RUN_MDL > $RUN_LOG
+  
+  Gillespie_average $INPUT_FILE $OUTPUT_FILE
+  
+  cd ..
+
+done
+
