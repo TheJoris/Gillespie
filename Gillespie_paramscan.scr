@@ -1,10 +1,18 @@
 #!/bin/bash
 
+# Run a parameter sweep with Gillespie.
+
+# Usage: ./Gillespie_paramscan <model file>
+
+# Model file should contain '[PARAM1]'. This file replaces every occurance of it 
+# with the parameter value.
+
 INPUT_FILE=$1
 PROJECT_NAME=`echo $INPUT_FILE | sed 's/\([A-Za-z_-]*\).*/\1/'`
 OUTPUT_FILE=`pwd`"/"$PROJECT_NAME".dat"
 
-K_NUMBER=( 1 2 4 8 16 32 64 128 256 512 1024 )
+#K_NUMBER=( 1 2 4 8 16 32 64 128 256 512 1024 )
+K_NUMBER=( 0.0000005 0.000001 0.000002 0.000004 0.000008 0.000016 0.000032 0.000064 0.000128 0.000256 0.000512 0.001024 0.002048 0.004096 0.008192 )
 PARAM_NBR=${#K_NUMBER[@]}
 
 #Count number of lines in file.
@@ -22,7 +30,8 @@ do
   mkdir $RUN_DIR
   j=`expr $i - 1`
 
-  sed 's/K[ \t]*==[ \t]*[0-9]*.[0-9]*/K == '${K_NUMBER[$j]}'/' <$INPUT_FILE > ./$RUN_DIR/$RUN_MDL
+  #sed 's/K[ \t]*==[ \t]*[0-9]*.[0-9]*/K == '${K_NUMBER[$j]}'/' <$INPUT_FILE > ./$RUN_DIR/$RUN_MDL
+  sed 's/\[PARAM1\]/'${K_NUMBER[$j]}'/' <$INPUT_FILE > ./$RUN_DIR/$RUN_MDL
 
   cd $RUN_DIR
 
@@ -31,7 +40,11 @@ do
   
   Gillespie_average $INPUT_FILE $OUTPUT_FILE
   
+  sed -i '$ s/^/'${K_NUMBER[$j]}' /' $OUTPUT_FILE
+    
   cd ..
+  
+  rm -r $RUN_DIR
 
 done
 
