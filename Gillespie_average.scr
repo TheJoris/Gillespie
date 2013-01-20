@@ -7,11 +7,11 @@
 
 PROJECT_NAME=`echo $1 | sed 's/\([A-Za-z_-]*\).*/\1/'`
 
-N_FILES=`ls -l $PROJECT_NAME.0.* | wc -l` 
+N_FILES=`ls -1 $PROJECT_NAME.0.* | wc -l` 
 
 for i in `seq 1 $N_FILES`
 do
-  FILE=`ls -l $PROJECT_NAME.0.* | gawk -v lnbr="$i" 'NR==lnbr {print $8}'`  
+  FILE=`ls -1 $PROJECT_NAME.0.* | gawk -v lnbr="$i" 'NR==lnbr {print $1}'`  
   
   SAMPLE_NBR=`cat $FILE | wc -l`
   SAMPLE_NBR=`expr $SAMPLE_NBR - 1`

@@ -4,34 +4,42 @@
 
 # Usage: ./Gillespie_paramscan <model file>
 
-# Model file should contain '[PARAM1]'. This file replaces every occurance of it 
-# with the parameter value.
+# Model file should contain parameter equated to '[PARAM1]',...,'[PARAMi]'. 
+# This file replaces every occurance of these with the parameter value 
+# spedified in the files PARAM1,...,PARAMi, and runs the simulation on the
+# model file.
 
 INPUT_FILE=$1
 PROJECT_NAME=`echo $INPUT_FILE | sed 's/\([A-Za-z_-]*\).*/\1/'`
 OUTPUT_FILE=`pwd`"/"$PROJECT_NAME".dat"
 
-#K_NUMBER=( 1 2 4 8 16 32 64 128 256 512 1024 )
-K_NUMBER=( 0.0000005 0.000001 0.000002 0.000004 0.000008 0.000016 0.000032 0.000064 0.000128 0.000256 0.000512 0.001024 0.002048 0.004096 0.008192 )
-PARAM_NBR=${#K_NUMBER[@]}
+#Find the number of PARAM files.
+rm -f PARAM*~
+PARAM_NBR=`ls -1 PARAM* | wc -l`
+paramfiles=`ls PARAM*`
 
-#Count number of lines in file.
-#N=`wc -l $file | awk '{print $1}'`
+#Find number of iterations. Assuming all files have the same length as the first.
+ITERATION_NBR=`cat PARAM1 | wc -l`
 
-echo $PARAM_NBR "simulations on roll, writing data to:" $OUTPUT_FILE
+echo $ITERATION_NBR "simulations on roll with" $PARAM_NBR "parameters, writing data to:" $PROJECT_NAME".dat"
 
-for i in `seq 1 $PARAM_NBR`
+for i in `seq 1 $ITERATION_NBR`
 do
 
   RUN_DIR=$PROJECT_NAME"_"$i
   RUN_MDL=$PROJECT_NAME"_"$i".mdl"
-  RUN_LOG=$PROJECT_NAME"_"$i".log" 
+  RUN_LOG=$PROJECT_NAME"_"$i".log"
 
   mkdir $RUN_DIR
-  j=`expr $i - 1`
+  cp $INPUT_FILE $RUN_DIR/$RUN_MDL
+ 
+  for paramfile in $paramfiles
+  do
+  
+    PARAM=`gawk -v lnbr="$i" 'NR==lnbr {print $1}' $paramfile`    
+    sed -i 's/\['$paramfile'\]/'$PARAM'/' ./$RUN_DIR/$RUN_MDL
 
-  #sed 's/K[ \t]*==[ \t]*[0-9]*.[0-9]*/K == '${K_NUMBER[$j]}'/' <$INPUT_FILE > ./$RUN_DIR/$RUN_MDL
-  sed 's/\[PARAM1\]/'${K_NUMBER[$j]}'/' <$INPUT_FILE > ./$RUN_DIR/$RUN_MDL
+  done
 
   cd $RUN_DIR
 
@@ -40,11 +48,14 @@ do
   
   Gillespie_average $INPUT_FILE $OUTPUT_FILE
   
-  sed -i '$ s/^/'${K_NUMBER[$j]}' /' $OUTPUT_FILE
-    
   cd ..
+  
+  for paramfile in $paramfiles 
+  do
+    PARAM=`gawk -v lnbr="$i" 'NR==lnbr {print $1}' $paramfile`
+    sed -i '$ s/^/'$PARAM' /' $OUTPUT_FILE
+  done
   
   rm -r $RUN_DIR
 
 done
-
