@@ -1,0 +1,4 @@
+#!/bin/bash
+
+Gillespie_parse $1 > Gillespie.inp
+Gillespie
