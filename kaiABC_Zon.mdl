@@ -1,0 +1,137 @@
+kaiABC_Zon : code name
+
+C0 C1 C2 C3 C4 C5 C6 C0A C1A C2A C3A C4A C5A C6A : components
+C0i C1i C2i C3i C4i C5i C6i : components
+C0iB C1iB C2iB C3iB C4iB C5iB C6iB : components
+C0iB2 C1iB2 C2iB2 C3iB2 C4iB2 C5iB2 C6iB2 : components
+C0iAB C1iAB C2iAB C3iAB C4iAB C5iAB C6iAB : components
+C0iAB2 C1iAB2 C2iAB2 C3iAB2 C4iAB2 C5iAB2 C6iAB2 : components
+C0iA2B2 C1iA2B2 C2iA2B2 C3iA2B2 C4iA2B2 C5iA2B2 C6iA2B2 : components
+A B : components
+
+C0 + A <--> C0A    : k = 10. : k = 1. 
+C0A     --> C1 + A : k = 1.
+
+C1 + A <--> C1A    : k = 10. : k = 3.
+C1A     --> C2 + A : k = 1.
+
+C2 + A <--> C2A    : k = 10. : k = 9.
+C2A     --> C3 + A : k = 1.
+
+C3 + A <--> C3A    : k = 10. : k = 27.
+C3A     --> C4 + A : k = 1.
+
+C4 + A <--> C4A    : k = 10. : k = 81.
+C4A     --> C5 + A : k = 1.
+
+C5 + A <--> C5A    : k = 10. : k = 243.  
+C5A     --> C6 + A : k = 1.
+
+C0 <--> C1 : k = 0.025 : k = 0.4
+C1 <--> C2 : k = 0.025 : k = 0.4
+C2 <--> C3 : k = 0.025 : k = 0.4
+C3 <--> C4 : k = 0.025 : k = 0.4
+C4 <--> C5 : k = 0.025 : k = 0.4
+C5 <--> C6 : k = 0.025 : k = 0.4
+
+C6i + B <--> C6iB       : k = 2.   : k = 1.
+C6iB + B <--> C6iB2     : k = 1.   : k = 2.
+C6iB + A <--> C6iAB     : k = 0.0001 : k = 10.
+C6iB2 + A <--> C6iAB2   : k = 0.0002 : k = 10.
+C6iAB2 + A <--> C6iA2B2 : k = 0.0001 : k = 20.
+
+C5i + B <--> C5iB       : k = 2. : k = 1.
+C5iB + B <--> C5iB2     : k = 1. : k = 2.
+C5iB + A <--> C5iAB     : k = 0.001 : k = 1.
+C5iB2 + A <--> C5iAB2   : k = 0.002 : k = 1.
+C5iAB2 + A <--> C5iA2B2 : k = 0.001   : k = 2.
+
+C4i + B <--> C4iB       : k = 2. : k = 1.
+C4iB + B <--> C4iB2     : k = 1. : k = 2.
+C4iB + A <--> C4iAB     : k = 100. : k = 1.
+C4iB2 + A <--> C4iAB2   : k = 200. : k = 1.
+C4iAB2 + A <--> C4iA2B2 : k = 100. : k = 2.
+
+C3i + B <--> C3iB       : k = 2.  : k = 1.
+C3iB + B <--> C3iB2     : k = 1.  : k = 2.
+C3iB + A <--> C3iAB     : k = 1000. : k = 1.
+C3iB2 + A <--> C3iAB2   : k = 2000. : k = 1.
+C3iAB2 + A <--> C3iA2B2 : k = 1000. : k = 2.
+
+C2i + B <--> C2iB       : k = 2.  : k = 1.
+C2iB + B <--> C2iB2     : k = 1.  : k = 2.
+C2iB + A <--> C2iAB     : k = 1000. : k = 1.
+C2iB2 + A <--> C2iAB2   : k = 2000. : k = 1.
+C2iAB2 + A <--> C2iA2B2 : k = 1000. : k = 2.
+
+C1i + B <--> C1iB       : k = 0.2  : k = 1.
+C1iB + B <--> C1iB2     : k = 0.1  : k = 2.
+C1iB + A <--> C1iAB     : k = 1000. : k = 1.
+C1iB2 + A <--> C1iAB2   : k = 2000. : k = 1.
+C1iAB2 + A <--> C1iA2B2 : k = 1000. : k = 2.
+
+C0i + B <--> C0iB       : k = 0.002   : k = 10. 
+C0iB + B <--> C0iB2     : k = 0.001   : k = 20.
+C0iB + A <--> C0iAB     : k = 0.01   : k = 10. 
+C0iB2 + A <--> C0iAB2   : k = 0.02   : k = 10.
+C0iAB2 + A <--> C0iA2B2 : k = 0.01   : k = 20.
+
+
+C6iA2B2  <--> C5iA2B2   : k = 0.4 : k = 0.025
+C6iAB2   <--> C5iAB2    : k = 0.4 : k = 0.025
+C6iAB    <--> C5iAB     : k = 0.4 : k = 0.025
+C6iB2    <--> C5iB2     : k = 0.4 : k = 0.025
+C6iB     <--> C5iB      : k = 0.4 : k = 0.025
+C6i      <--> C5i       : k = 0.4 : k = 0.025
+
+C5iA2B2  <--> C4iA2B2   : k = 0.4 : k = 0.025
+C5iAB2   <--> C4iAB2    : k = 0.4 : k = 0.025
+C5iAB    <--> C4iAB     : k = 0.4 : k = 0.025
+C5iB2    <--> C4iB2     : k = 0.4 : k = 0.025
+C5iB     <--> C4iB      : k = 0.4 : k = 0.025
+C5i      <--> C4i       : k = 0.4 : k = 0.025
+
+C4iA2B2  <--> C3iA2B2   : k = 0.4 : k = 0.025
+C4iAB2   <--> C3iAB2    : k = 0.4 : k = 0.025
+C4iAB    <--> C3iAB     : k = 0.4 : k = 0.025
+C4iB2    <--> C3iB2     : k = 0.4 : k = 0.025
+C4iB     <--> C3iB      : k = 0.4 : k = 0.025
+C4i      <--> C3i       : k = 0.4 : k = 0.025
+
+C3iA2B2  <--> C2iA2B2   : k = 0.4 : k = 0.025
+C3iAB2   <--> C2iAB2    : k = 0.4 : k = 0.025
+C3iAB    <--> C2iAB     : k = 0.4 : k = 0.025
+C3iB2    <--> C2iB2     : k = 0.4 : k = 0.025
+C3iB     <--> C2iB      : k = 0.4 : k = 0.025
+C3i      <--> C2i       : k = 0.4 : k = 0.025
+
+C2iA2B2  <--> C1iA2B2   : k = 0.4 : k = 0.025
+C2iAB2   <--> C1iAB2    : k = 0.4 : k = 0.025
+C2iAB    <--> C1iAB     : k = 0.4 : k = 0.025
+C2iB2    <--> C1iB2     : k = 0.4 : k = 0.025
+C2iB     <--> C1iB      : k = 0.4 : k = 0.025
+C2i      <--> C1i       : k = 0.4 : k = 0.025
+
+C1iA2B2  <--> C0iA2B2   : k = 0.4 : k = 0.025
+C1iAB2   <--> C0iAB2    : k = 0.4 : k = 0.025
+C1iAB    <--> C0iAB     : k = 0.4 : k = 0.025
+C1iB2    <--> C0iB2     : k = 0.4 : k = 0.025
+C1iB     <--> C0iB      : k = 0.4 : k = 0.025
+C1i      <--> C0i       : k = 0.4 : k = 0.025
+
+
+C0 <--> C0i    : k = 0.000001  : k = 100.
+C1 <--> C1i    : k = 0.00001  : k = 100.
+C2 <--> C2i    : k = 0.0001  : k = 100.
+C3 <--> C3i    : k = 0.001  : k = 100.
+C4 <--> C4i    : k = 0.01   : k = 100.
+C5 <--> C5i    : k = 0.1   : k = 100.
+C6 <--> C6i    : k = 10.  : k = 100.
+
+
+C0 == 1000  : initial
+
+A  == 1000 : initial
+B  == 3000 : initial
+
+
