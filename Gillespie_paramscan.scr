@@ -46,6 +46,7 @@ do
   Gillespie_parse $RUN_MDL > Gillespie.inp
   Gillespie $RUN_MDL > $RUN_LOG
   
+  Gillespie_kaiana $PROJECT_NAME
   Gillespie_average $INPUT_FILE $OUTPUT_FILE
   
   cd ..
@@ -56,6 +57,6 @@ do
     sed -i '$ s/^/'$PARAM' /' $OUTPUT_FILE
   done
   
-  rm -r $RUN_DIR
+  #rm -r $RUN_DIR
 
 done

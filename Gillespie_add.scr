@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Read in a number of Gillespie particle number output files via PIPE
+# and add the particle numbers at each point in time. Sum timetrace is
+# written to <output_file>.
+
+#Usage >ls -1 [regex] | Gillespie_add.scr <output_file>
+
+files=()
+while read data; do
+  files=( "${files[@]}" "$data" )
+done
+
+echo "Adding particle numbers in the following ${#files[@]} files:"
+echo ${files[@]}
+
+SAMPLE_NBR=`cat ${files[1]} | wc -l`
+  
+for i in `seq 2 $SAMPLE_NBR` do
+
+  summe=()
+  timepoint=`gawk -v lnbr="$i" 'NR==lnbr {PRINT $1}' ${files[1]}`
+  for thisfile in $files do 
+  
+    temp=`gawk -v lnbr="$i" 'NR==lnbr {PRINT $2}' $thisfile`
+    summe=`expr $summe + $temp`
+  
+  done
+  
+  echo -e "$timepoint \t $summe" >> $1
+  
+done
