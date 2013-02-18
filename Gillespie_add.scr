@@ -1,10 +1,26 @@
 #!/bin/bash
 
 # Read in a number of Gillespie particle number output files via PIPE
-# and add the particle numbers at each point in time. Sum timetrace is
+# and add the particle numbers at each point in time. Summed timetrace is
 # written to <output_file>.
 
 #Usage >ls -1 [regex] | Gillespie_add.scr <output_file>
+
+# for i in {1..10}; do ls ./kaiKondo_$i/*Cp* | Gillespie_add avr.$i.Cp; done
+
+if [ $goethe ]
+then
+  read -p "$1 already exists. Remove? [Y/N] [ENTER]: " todo
+  if [ $todo == "Y" ]
+  then
+    rm -f $1
+  else
+    echo "Exiting program..."
+    exit 1
+  fi
+fi
+
+rm -f $1
 
 files=()
 while read data; do
@@ -14,19 +30,4 @@ done
 echo "Adding particle numbers in the following ${#files[@]} files:"
 echo ${files[@]}
 
-SAMPLE_NBR=`cat ${files[1]} | wc -l`
-  
-for i in `seq 2 $SAMPLE_NBR` do
-
-  summe=()
-  timepoint=`gawk -v lnbr="$i" 'NR==lnbr {PRINT $1}' ${files[1]}`
-  for thisfile in $files do 
-  
-    temp=`gawk -v lnbr="$i" 'NR==lnbr {PRINT $2}' $thisfile`
-    summe=`expr $summe + $temp`
-  
-  done
-  
-  echo -e "$timepoint \t $summe" >> $1
-  
-done
+awk 'FNR==1{f++}{a[f,FNR]=$2; timepoints[FNR]=$1}END{for(x=1;x<=FNR;x++){{temp = 0 };for(y=1;y<ARGC;y++){temp += a[y,x]};{printf("%s %s", timepoints[x], temp); print ""};}}' ${files[@]} > $1

@@ -46,7 +46,12 @@ do
   Gillespie_parse $RUN_MDL > Gillespie.inp
   Gillespie $RUN_MDL > $RUN_LOG
   
-  Gillespie_kaiana $PROJECT_NAME
+  #Gillespie_kaiana $PROJECT_NAME
+  ls *Cp* | Gillespie_add avr.Cp
+  ls *lCp* | Gillespie_add avr.lCp
+  ls *lATP* | Gillespie_add avr.lATP
+  ls *ADP* | Gillespie_add avr.ADP
+
   Gillespie_average $INPUT_FILE $OUTPUT_FILE
   
   cd ..
