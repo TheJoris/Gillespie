@@ -28,6 +28,9 @@ while read data; do
 done
 
 echo "Adding particle numbers in the following ${#files[@]} files:"
-echo ${files[@]}
+for i in `seq 0 ${#files[@]}` 
+do
+  echo ${files[$i]}
+done
 
 awk 'FNR==1{f++}{a[f,FNR]=$2; timepoints[FNR]=$1}END{for(x=1;x<=FNR;x++){{temp = 0 };for(y=1;y<ARGC;y++){temp += a[y,x]};{printf("%s %s", timepoints[x], temp); print ""};}}' ${files[@]} > $1

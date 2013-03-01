@@ -1,11 +1,25 @@
 #!/bin/bash
 
+rm -f kaiRustl.0*
+rm -f *~
+rm -f avr*
+
 Gillespie_parse $1 > Gillespie.inp
 Gillespie
 
-rm -f avr*
+# Kondo model.
+#ls *lCp* | Gillespie_add avr.lCp
+#ls *lATP* | Gillespie_add avr.lATP
+#ls *ADP* | Gillespie_add avr.ADP
+#ls *Cp* | Gillespie_add avr.Cp
 
-ls *lCp* | Gillespie_add avr.lCp
+# Rust model
+ls kaiRustl.0.ST* | Gillespie_add avr.ST
+ls kaiRustl.0.SP* kaiRustl.0.SlP* | Gillespie_add avr.SP
+ls kaiRustl.0.PP* kaiRustl.0.lPlP* kaiRustl.0.PlP* kaiRustl.0.lPP* | Gillespie_add avr.PP
+ls kaiRustl.0.PT* kaiRustl.0.lPT* | Gillespie_add avr.PT
+
+ls *.SlP* *.lPlP* *.lPlP* *.PlP* *.PlP* *.lPP* *.lPP* *.lPT* | Gillespie_add avr.lP
 ls *lATP* | Gillespie_add avr.lATP
-ls *ADP* | Gillespie_add avr.ADP
-ls *Cp* | Gillespie_add avr.Cp
+ls *lPi* | Gillespie_add avr.lPi
+

@@ -41,16 +41,28 @@ do
 
   done
 
+  cp ../gplot_Kondo.cfg ./$RUN_DIR
   cd $RUN_DIR
 
   Gillespie_parse $RUN_MDL > Gillespie.inp
   Gillespie $RUN_MDL > $RUN_LOG
   
   #Gillespie_kaiana $PROJECT_NAME
-  ls *Cp* | Gillespie_add avr.Cp
-  ls *lCp* | Gillespie_add avr.lCp
+  #ls *Cp* | Gillespie_add avr.Cp
+  #ls *lCp* | Gillespie_add avr.lCp
+  #ls *lATP* | Gillespie_add avr.lATP
+  #ls *ADP* | Gillespie_add avr.ADP
+
+  # Rust model
+  ls kaiRustl.0.ST* | Gillespie_add avr.ST
+  ls kaiRustl.0.SP* kaiRustl.0.SlP* | Gillespie_add avr.SP
+  ls kaiRustl.0.PP* kaiRustl.0.lPlP* kaiRustl.0.PlP* kaiRustl.0.lPP* | Gillespie_add avr.PP
+  ls kaiRustl.0.PT* kaiRustl.0.lPT* | Gillespie_add avr.PT
+
+  ls *.SlP* *.lPlP* *.lPlP* *.PlP* *.PlP* *.lPP* *.lPP* *.lPT* | Gillespie_add avr.lP
   ls *lATP* | Gillespie_add avr.lATP
-  ls *ADP* | Gillespie_add avr.ADP
+  ls *lPi* | Gillespie_add avr.lPi
+  ls *.lPlP-ADP *.lPP-ADP *.lPT-ADP *.PlP-ADP *.PP-ADP *.PT-ADP *.SlP-ADP *.SP-ADP *.ST-ADP | Gillespie_add avr.ADP
 
   Gillespie_average $INPUT_FILE $OUTPUT_FILE
   
