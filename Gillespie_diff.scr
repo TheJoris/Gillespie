@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Calculate the time derivative of a Gillespie timetrace.
+# Output <time> <#(t+1)-#(t)> <(#(t+1) - #(t)) / (t+1 - t)>
+
+# Usage > Gillespie_diff <Timetrace> <Output>
+
+gawk 'NR > 2 {print $1" "$2-ll" "($2-ll)/($1-kk)}
+{ll=$2; kk=$1}' $1 > $2
+

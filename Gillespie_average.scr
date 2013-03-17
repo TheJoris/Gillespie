@@ -22,7 +22,10 @@ do
 done
 
 echo ${AVERAGE[@]} >> $2
-  
 
+#FILE="kaiZon.Puw"
+#SAMPLE_NBR=`cat $FILE | wc -l`
+#SAMPLE_NBR=`expr $SAMPLE_NBR - 1`  
+#echo `gawk -v sample_nbr="$SAMPLE_NBR" '{ sum += $2 }; END {print sum/sample_nbr}' $FILE` >> ../hans.txt
   
 
