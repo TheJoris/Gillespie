@@ -15,6 +15,7 @@ OUTPUT_FILE=`pwd`"/"$PROJECT_NAME".dat"
 
 #Find the number of PARAM files.
 rm -f PARAM*~
+rm *.dat
 PARAM_NBR=`ls -1 PARAM* | wc -l`
 paramfiles=`ls PARAM*`
 

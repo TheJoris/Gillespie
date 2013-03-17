@@ -1,0 +1,65 @@
+# Four state kaiC model.
+# Assuming phosphotrasfer from and to ATP/ADP only.
+# No KaiA or kaiB.
+
+kaiRust : code name
+0  : total eq
+25 : total prod
+.05 : time
+
+ST SP PP PT : components
+ATP ADP Pi :components
+ST-ATP SP-ATP PP-ATP PT-ATP : components
+ST-ADP SP-ADP PP-ADP PT-ADP : components
+
+# ATP, lATP and ADP binding.
+# We know ADP/ATP affinity ~.96 for CII(unphos)
+# and ~.1 for CI. (CI-only)
+
+ST + ATP <--> ST-ATP        : k = .001 : k = .01
+SP + ATP <--> SP-ATP        : k = .001 : k = .01
+PP + ATP <--> PP-ATP        : k = .001 : k = .01
+PT + ATP <--> PT-ATP        : k = .001 : k = .01
+
+ST + ADP <--> ST-ADP        : k = .001 : k = 1.0
+SP + ADP <--> SP-ADP        : k = .001 : k = 1.0
+PP + ADP <--> PP-ADP        : k = .001 : k = 1.0
+PT + ADP <--> PT-ADP        : k = .001 : k = 1.0
+
+
+#ATP, lATP hydrolysis reactions.
+
+ST-ATP <--> ST-ADP + Pi     : k = 1.0 : k = 1E-6
+SP-ATP <--> SP-ADP + Pi     : k = 1.0 : k = 1E-6
+PP-ATP <--> PP-ADP + Pi     : k = 1.0 : k = 1E-6
+PT-ATP <--> PT-ADP + Pi     : k = 1.0 : k = 1E-6
+
+
+#Phosphotransfer reactions. (noKaiA)
+
+ST-ATP <--> SP-ADP          : k = 0.00 : k = 0.21
+SP-ATP <--> PP-ADP          : k = 0.00 : k = 0.00
+PP-ADP <--> PT-ATP          : k = 0.31 : k = 0.00
+PT-ADP <--> ST-ATP          : k = 0.11 : k = 0.00
+
+
+#Phosphotransfer reactions. (KaiA)
+
+#ST-ATP <--> SP-ADP         : k = 0.48 : k = 0.08
+#SP-ATP <--> PP-ADP         : k = 0.21 : k = 0.17
+#PP-ADP <--> PT-ATP         : k = 0.10 : k = 0.51
+#PT-ADP <--> ST-ATP         : k = 0.05 : k = 0.05
+
+
+# For static ATP level we use cell conditions of:
+# ATP = 1mM  ~ 1E6 1/(um)^3
+# ADP = 10uM ~ 1E4 1/(um)^3
+# Pi  = 1mM  ~ 1E6 1/(um)^3
+
+# Initial conditions
+#ST == 10000  : initial
+#SP == 1500  : initial
+#PP == 4000  : initial
+#PT == 1500  : initial
+ATP == 1E6  : initial
+

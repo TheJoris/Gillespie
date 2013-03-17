@@ -1,0 +1,132 @@
+# Four state kaiC model by Rust, with labeled Pi.
+# Assuming phosphotrasfer from and to ATP/ADP only.
+# No KaiA or kaiB.
+
+kaiRustl : code name
+0  : total eq
+50 : total prod
+.05 : time
+
+ST SP PP PT : components
+SlP lPlP PlP lPP lPT : components
+ATP ADP Pi lATP lPi :components
+
+ST-ATP SP-ATP PP-ATP PT-ATP : components
+SlP-ATP lPlP-ATP PlP-ATP lPP-ATP lPT-ATP : components
+
+ST-lATP SP-lATP PP-lATP PT-lATP : components
+SlP-lATP lPlP-lATP PlP-lATP lPP-lATP lPT-lATP : components
+
+ST-ADP SP-ADP PP-ADP PT-ADP : components
+SlP-ADP lPlP-ADP PlP-ADP lPP-ADP lPT-ADP : components
+
+# ATP, lATP and ADP binding.
+# We know ADP/ATP affinity ~.96 for CII(unphos)
+# Because of ATPase/transferase, this doesn't say much 
+# about bare affinities.
+# and ~.1 for CI. (CI-only)
+
+ST + ATP <--> ST-ATP        : k = .001 : k = .01
+SP + ATP <--> SP-ATP        : k = .001 : k = .01
+PP + ATP <--> PP-ATP        : k = .001 : k = .01
+PT + ATP <--> PT-ATP        : k = .001 : k = .01
+
+ST + lATP <--> ST-lATP      : k = .001 : k = .01
+SP + lATP <--> SP-lATP      : k = .001 : k = .01
+PP + lATP <--> PP-lATP      : k = .001 : k = .01
+PT + lATP <--> PT-lATP      : k = .001 : k = .01
+
+SlP + ATP <--> SlP-ATP      : k = .001 : k = .01
+lPlP + ATP <--> lPlP-ATP    : k = .001 : k = .01
+PlP + ATP <--> PlP-ATP      : k = .001 : k = .01
+lPP + ATP <--> lPP-ATP      : k = .001 : k = .01
+lPT + ATP <--> lPT-ATP      : k = .001 : k = .01
+
+SlP + lATP <--> SlP-lATP    : k = .001 : k = .01
+lPlP + lATP <--> lPlP-lATP  : k = .001 : k = .01
+PlP + lATP <--> PlP-lATP    : k = .001 : k = .01
+lPP + lATP <--> lPP-lATP    : k = .001 : k = .01
+lPT + lATP <--> lPT-lATP    : k = .001 : k = .01
+
+ST + ADP <--> ST-ADP        : k = .001 : k = 1.0
+SP + ADP <--> SP-ADP        : k = .001 : k = 1.0
+PP + ADP <--> PP-ADP        : k = .001 : k = 1.0
+PT + ADP <--> PT-ADP        : k = .001 : k = 1.0
+
+SlP + ADP <--> SlP-ADP      : k = .001 : k = 1.0
+lPlP + ADP <--> lPlP-ADP    : k = .001 : k = 1.0
+PlP + ADP <--> PlP-ADP      : k = .001 : k = 1.0
+lPP + ADP <--> lPP-ADP      : k = .001 : k = 1.0
+lPT + ADP <--> lPT-ADP      : k = .001 : k = 1.0
+
+
+#ATP, lATP hydrolysis reactions.
+
+ST-ATP <--> ST-ADP + Pi     : k = 1.0 : k = 1E-6
+SP-ATP <--> SP-ADP + Pi     : k = 1.0 : k = 1E-6
+PP-ATP <--> PP-ADP + Pi     : k = 1.0 : k = 1E-6
+PT-ATP <--> PT-ADP + Pi     : k = 1.0 : k = 1E-6
+
+ST-lATP <--> ST-ADP + lPi   : k = 1.0 : k = 1E-6
+SP-lATP <--> SP-ADP + lPi   : k = 1.0 : k = 1E-6
+PP-lATP <--> PP-ADP + lPi   : k = 1.0 : k = 1E-6
+PT-lATP <--> PT-ADP + lPi   : k = 1.0 : k = 1E-6
+
+SlP-ATP <--> SlP-ADP + Pi   : k = 1.0 : k = 1E-6
+lPlP-ATP <--> lPlP-ADP + Pi : k = 1.0 : k = 1E-6
+PlP-ATP <--> PlP-ADP + Pi   : k = 1.0 : k = 1E-6
+lPP-ATP <--> lPP-ADP + Pi   : k = 1.0 : k = 1E-6
+lPT-ATP <--> lPT-ADP + Pi   : k = 1.0 : k = 1E-6
+
+SlP-lATP <--> SlP-ADP + lPi   : k = 1.0 : k = 1E-6
+lPlP-lATP <--> lPlP-ADP + lPi : k = 1.0 : k = 1E-6
+PlP-lATP <--> PlP-ADP + lPi   : k = 1.0 : k = 1E-6
+lPP-lATP <--> lPP-ADP + lPi   : k = 1.0 : k = 1E-6
+lPT-lATP <--> lPT-ADP + lPi   : k = 1.0 : k = 1E-6
+
+
+#Phosphotransfer reactions. (noKaiA)
+
+ST-ATP <--> SP-ADP          : k = 0.00 : k = 0.21
+SP-ATP <--> PP-ADP          : k = 0.00 : k = 0.00
+PP-ADP <--> PT-ATP          : k = 0.31 : k = 0.00
+PT-ADP <--> ST-ATP          : k = 0.11 : k = 0.00
+
+
+ST-lATP <--> SlP-ADP        : k = 0.00 : k = 0.21
+
+SlP-lATP <--> lPlP-ADP      : k = 0.00 : k = 0.00
+SP-lATP <--> lPP-ADP        : k = 0.00 : k = 0.00
+
+PlP-ADP <--> PT-lATP        : k = 0.31 : k = 0.00
+lPlP-ADP <--> lPT-lATP      : k = 0.31 : k = 0.00
+
+lPT-ADP <--> ST-lATP        : k = 0.11 : k = 0.00
+
+
+SlP-ATP <--> PlP-ADP        : k = 0.00 : k = 0.00
+
+lPP-ADP <--> lPT-ATP        : k = 0.31 : k = 0.00
+
+
+#Phosphotransfer reactions. (KaiA)
+
+#ST-ATP <--> SP-ADP         : k = 0.48 : k = 0.08
+#SP-ATP <--> PP-ADP         : k = 0.21 : k = 0.17
+#PP-ADP <--> PT-ATP         : k = 0.10 : k = 0.51
+#PT-ADP <--> ST-ATP         : k = 0.05 : k = 0.05
+
+
+# For static ATP level we use cell conditions of:
+# ATP = 1mM  ~ 1E6 1/(um)^3
+# ADP = 10uM ~ 1E4 1/(um)^3
+# Pi  = 1mM  ~ 1E6 1/(um)^3
+# 9000 kaiC/um^3 = 15uM.
+
+# Initial conditions
+ST   == 6000 : initial
+SlP  == 750  : initial
+lPlP == 1500 : initial
+lPT  == 750  : initial
+ATP  == 1E6 : initial
+ADP  == 0 : initial

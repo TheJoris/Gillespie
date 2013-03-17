@@ -1,0 +1,64 @@
+# Model file for 2 state model of kaiC used in experiment by Kondo et al. JBC, 2012.
+# Model includes labeled Pi groups. Parameters a similar to what is found by curve fitting 
+# in the paper. Assuming phosphotransfer via ADP/ATP only.
+
+kaiKondo : code name
+0  : total eq
+25 : total prod
+.05 : time
+
+C Cp lCp : components
+ATP ADP Pi lPi lATP  :components
+C-ATP Cp-ATP C-ADP Cp-ADP C-lATP Cp-lATP: components
+
+# Assuming sys.volume = 1um^3.
+
+#ATP, lATP and ADP binding.
+# We know ADP/ATP affinity ~.96 for CII(unphos)
+# and ~.1 for CI. (CI-only)
+
+C + ATP <--> C-ATP        : k = .001 : k = .01
+Cp + ATP <--> Cp-ATP      : k = .001 : k = .01
+
+C + ADP <--> C-ADP        : k = .001 : k = .4
+Cp + ADP <--> Cp-ADP      : k = .001 : k = .4
+
+C + lATP <--> C-lATP      : k = .001 : k = .01
+Cp + lATP <--> Cp-lATP    : k = .001 : k = .01
+lCp + ATP <--> lCp-ATP    : k = .001 : k = .01
+lCp + lATP <--> lCp-lATP  : k = .001 : k = .01
+lCp + ADP <--> lCp-ADP    : k = .001 : k = .4
+
+
+#ATP, lATP hydrolysis reactions.
+
+Cp-ATP <--> Cp-ADP + Pi   : k = 1. : k = 1E-6
+C-ATP <--> C-ADP + Pi     : k = 1. : k = 1E-6
+
+lCp-ATP <--> lCp-ADP + Pi : k = 1. : k = 1E-6
+
+
+Cp-lATP <--> Cp-ADP + lPi : k = 1. : k = 1E-6
+C-lATP <--> C-ADP + lPi   : k = 1. : k = 1E-6
+
+lCp-lATP <--> lCp-ADP + lPi : k = 1. : k = 1E-6
+
+
+#Phosphotransfer reactions.
+
+Cp-ADP <--> C-ATP         : k = .8 : k = .2
+
+lCp-ADP <--> C-lATP       : k = .8 : k = .2
+
+
+
+
+# For static ATP level we use cell conditions of:
+# ATP = 1mM  ~ 1E6 1/(um)^3
+# ADP = 10uM ~ 1E4 1/(um)^3
+# Pi  = 1mM  ~ 1E6 1/(um)^3
+
+# Initial conditions
+lCp == 9000  : initial
+ATP == 1.0E6 : initial
+ADP == 0. :initial
