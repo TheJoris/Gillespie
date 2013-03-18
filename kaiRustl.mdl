@@ -26,38 +26,38 @@ SlP-ADP lPlP-ADP PlP-ADP lPP-ADP lPT-ADP : components
 # about bare affinities.
 # and ~.1 for CI. (CI-only)
 
-ST + ATP <--> ST-ATP        : k = .001 : k = .01
-SP + ATP <--> SP-ATP        : k = .001 : k = .01
-PP + ATP <--> PP-ATP        : k = .001 : k = .01
-PT + ATP <--> PT-ATP        : k = .001 : k = .01
+ST + ATP <--> ST-ATP        : k = 1E-6 : k = .01
+SP + ATP <--> SP-ATP        : k = 1E-6 : k = .01
+PP + ATP <--> PP-ATP        : k = 1E-6 : k = .01
+PT + ATP <--> PT-ATP        : k = 1E-6 : k = .01
 
-ST + lATP <--> ST-lATP      : k = .001 : k = .01
-SP + lATP <--> SP-lATP      : k = .001 : k = .01
-PP + lATP <--> PP-lATP      : k = .001 : k = .01
-PT + lATP <--> PT-lATP      : k = .001 : k = .01
+ST + lATP <--> ST-lATP      : k = 1E-6 : k = .01
+SP + lATP <--> SP-lATP      : k = 1E-6 : k = .01
+PP + lATP <--> PP-lATP      : k = 1E-6 : k = .01
+PT + lATP <--> PT-lATP      : k = 1E-6 : k = .01
 
-SlP + ATP <--> SlP-ATP      : k = .001 : k = .01
-lPlP + ATP <--> lPlP-ATP    : k = .001 : k = .01
-PlP + ATP <--> PlP-ATP      : k = .001 : k = .01
-lPP + ATP <--> lPP-ATP      : k = .001 : k = .01
-lPT + ATP <--> lPT-ATP      : k = .001 : k = .01
+SlP + ATP <--> SlP-ATP      : k = 1E-6 : k = .01
+lPlP + ATP <--> lPlP-ATP    : k = 1E-6 : k = .01
+PlP + ATP <--> PlP-ATP      : k = 1E-6 : k = .01
+lPP + ATP <--> lPP-ATP      : k = 1E-6 : k = .01
+lPT + ATP <--> lPT-ATP      : k = 1E-6 : k = .01
 
-SlP + lATP <--> SlP-lATP    : k = .001 : k = .01
-lPlP + lATP <--> lPlP-lATP  : k = .001 : k = .01
-PlP + lATP <--> PlP-lATP    : k = .001 : k = .01
-lPP + lATP <--> lPP-lATP    : k = .001 : k = .01
-lPT + lATP <--> lPT-lATP    : k = .001 : k = .01
+SlP + lATP <--> SlP-lATP    : k = 1E-6 : k = .01
+lPlP + lATP <--> lPlP-lATP  : k = 1E-6 : k = .01
+PlP + lATP <--> PlP-lATP    : k = 1E-6 : k = .01
+lPP + lATP <--> lPP-lATP    : k = 1E-6 : k = .01
+lPT + lATP <--> lPT-lATP    : k = 1E-6 : k = .01
 
-ST + ADP <--> ST-ADP        : k = .001 : k = 1.0
-SP + ADP <--> SP-ADP        : k = .001 : k = 1.0
-PP + ADP <--> PP-ADP        : k = .001 : k = 1.0
-PT + ADP <--> PT-ADP        : k = .001 : k = 1.0
+ST + ADP <--> ST-ADP        : k = 1E-6 : k = 1.0
+SP + ADP <--> SP-ADP        : k = 1E-6 : k = 1.0
+PP + ADP <--> PP-ADP        : k = 1E-6 : k = 1.0
+PT + ADP <--> PT-ADP        : k = 1E-6 : k = 1.0
 
-SlP + ADP <--> SlP-ADP      : k = .001 : k = 1.0
-lPlP + ADP <--> lPlP-ADP    : k = .001 : k = 1.0
-PlP + ADP <--> PlP-ADP      : k = .001 : k = 1.0
-lPP + ADP <--> lPP-ADP      : k = .001 : k = 1.0
-lPT + ADP <--> lPT-ADP      : k = .001 : k = 1.0
+SlP + ADP <--> SlP-ADP      : k = 1E-6 : k = 1.0
+lPlP + ADP <--> lPlP-ADP    : k = 1E-6 : k = 1.0
+PlP + ADP <--> PlP-ADP      : k = 1E-6 : k = 1.0
+lPP + ADP <--> lPP-ADP      : k = 1E-6 : k = 1.0
+lPT + ADP <--> lPT-ADP      : k = 1E-6 : k = 1.0
 
 
 #ATP, lATP hydrolysis reactions.

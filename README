@@ -13,9 +13,10 @@ to simulate the growing and division of cells.
 
 Authors
 ========================
-[Unknown]
+Pieter Rein ten Wolde @ FOM Institute AMOLF [Founder]
 David Zwicker @ FOM Institute AMOLF
 Mark Bosman @ FOM Institute AMOLF
+Joris Paijmans @ FOM Institute AMOLF
 
 License
 ========================
@@ -34,12 +35,17 @@ Files in this package
 4. kai_analyses.pl: Generate data specific for the kai model. (Specified in kaiABC.mdl)
                     Use by typing: ./kai_analyses.pl <model_name>
                     inside the models directory.
-5. kaiABC.mdl     : Example model file for the kai circadian oscillator.
-6. Makefile       : makefile to compile the program.
-7. Makefile.*     : makefiles which specify the paths to the required libraries.
-8. .c,.h          : C source files for the Gillespie program.
+5. Makefile       : makefile to compile the program.
+6. Makefile.*     : makefiles which specify the paths to the required libraries.
+7. .c,.h          : C source files for the Gillespie program.
 
+Model files
 
+1. kaiABC.mdl     : Example model file for the kai circadian oscillator.
+2. kaiKondo.mdl   : 2 state kaiC model used in Nishiwaki et al., JBC - 2012, with 
+                    dephosphorylation only via ATP regeneration.        
+3. kaiRust        : 4 state kaiC model by Rust.
+4. kaiRustl       : 4 state kaiC model by Rust with labeled phosphate groups.
 
 Prerequisites
 ========================
@@ -48,6 +54,12 @@ Prerequisites
 2. C standard libraries
 3. GNU make
 3. Perl
+
+Repository
+========================
+For updates visit the main repository for this project:
+
+https://github.com/TheJoris/Gillespie.git
 
 
 Installing and Building

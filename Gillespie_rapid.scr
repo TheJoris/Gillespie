@@ -3,7 +3,7 @@
 # Rappdif execution of Gillespie program. Both parsing and running in one go!
 # Usage > Gillespie_rapid [model_file.mdl]
 
-rm -f kaiRustl.0*
+rm -f kaiRust.0*
 rm -f *~
 rm -f avr*
 
@@ -18,16 +18,16 @@ Gillespie
 #ls *.lPi* | Gillespie_add avr.lPi
 
 # Kondo et kaiA model
-ls *Cp* | Gillespie_add avr.Cp
-ls *ADP* | Gillespie_add avr.ADP
-ls *.Pi* | Gillespie_add avr.lPi
-ls *.AC* | Gillespie_add avr.AC
+#ls *Cp* | Gillespie_add avr.Cp
+#ls *ADP* | Gillespie_add avr.ADP
+#ls *.Pi* | Gillespie_add avr.lPi
+#ls *.AC* | Gillespie_add avr.AC
 
 # Rust model
-#ls kaiRustl.0.ST* | Gillespie_add avr.ST
-#ls kaiRustl.0.SP* kaiRustl.0.SlP* | Gillespie_add avr.SP
-#ls kaiRustl.0.PP* kaiRustl.0.lPlP* kaiRustl.0.PlP* kaiRustl.0.lPP* | Gillespie_add avr.PP
-#ls kaiRustl.0.PT* kaiRustl.0.lPT* | Gillespie_add avr.PT
+ls kaiRust.0.ST* | Gillespie_add avr.ST
+ls kaiRust.0.SP* kaiRustl.0.SlP* | Gillespie_add avr.SP
+ls kaiRust.0.PP* kaiRustl.0.lPlP* kaiRustl.0.PlP* kaiRustl.0.lPP* | Gillespie_add avr.PP
+ls kaiRust.0.PT* kaiRustl.0.lPT* | Gillespie_add avr.PT
 
 #ls *.SlP* *.lPlP* *.lPlP* *.PlP* *.PlP* *.lPP* *.lPP* *.lPT* | Gillespie_add avr.lP
 #ls *lATP* | Gillespie_add avr.lATP

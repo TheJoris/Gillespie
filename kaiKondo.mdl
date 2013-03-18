@@ -17,17 +17,17 @@ C-ATP Cp-ATP C-ADP Cp-ADP C-lATP Cp-lATP: components
 # We know ADP/ATP affinity ~.96 for CII(unphos)
 # and ~.1 for CI. (CI-only)
 
-C + ATP <--> C-ATP        : k = .001 : k = .01
-Cp + ATP <--> Cp-ATP      : k = .001 : k = .01
+C + ATP <--> C-ATP        : k = 1E-6 : k = .01
+Cp + ATP <--> Cp-ATP      : k = 1E-6 : k = .01
 
-C + ADP <--> C-ADP        : k = .001 : k = .4
-Cp + ADP <--> Cp-ADP      : k = .001 : k = .4
+C + ADP <--> C-ADP        : k = 1E-6 : k = .4
+Cp + ADP <--> Cp-ADP      : k = 1E-6 : k = .4
 
-C + lATP <--> C-lATP      : k = .001 : k = .01
-Cp + lATP <--> Cp-lATP    : k = .001 : k = .01
-lCp + ATP <--> lCp-ATP    : k = .001 : k = .01
-lCp + lATP <--> lCp-lATP  : k = .001 : k = .01
-lCp + ADP <--> lCp-ADP    : k = .001 : k = .4
+C + lATP <--> C-lATP      : k = 1E-6 : k = .01
+Cp + lATP <--> Cp-lATP    : k = 1E-6 : k = .01
+lCp + ATP <--> lCp-ATP    : k = 1E-6 : k = .01
+lCp + lATP <--> lCp-lATP  : k = 1E-6 : k = .01
+lCp + ADP <--> lCp-ADP    : k = 1E-6 : k = .4
 
 
 #ATP, lATP hydrolysis reactions.

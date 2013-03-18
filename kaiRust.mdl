@@ -16,15 +16,15 @@ ST-ADP SP-ADP PP-ADP PT-ADP : components
 # We know ADP/ATP affinity ~.96 for CII(unphos)
 # and ~.1 for CI. (CI-only)
 
-ST + ATP <--> ST-ATP        : k = .001 : k = .01
-SP + ATP <--> SP-ATP        : k = .001 : k = .01
-PP + ATP <--> PP-ATP        : k = .001 : k = .01
-PT + ATP <--> PT-ATP        : k = .001 : k = .01
+ST + ATP <--> ST-ATP        : k = 1E-6 : k = .01
+SP + ATP <--> SP-ATP        : k = 1E-6 : k = .01
+PP + ATP <--> PP-ATP        : k = 1E-6 : k = .01
+PT + ATP <--> PT-ATP        : k = 1E-6 : k = .01
 
-ST + ADP <--> ST-ADP        : k = .001 : k = 1.0
-SP + ADP <--> SP-ADP        : k = .001 : k = 1.0
-PP + ADP <--> PP-ADP        : k = .001 : k = 1.0
-PT + ADP <--> PT-ADP        : k = .001 : k = 1.0
+ST + ADP <--> ST-ADP        : k = 1E-6 : k = 1.0
+SP + ADP <--> SP-ADP        : k = 1E-6 : k = 1.0
+PP + ADP <--> PP-ADP        : k = 1E-6 : k = 1.0
+PT + ADP <--> PT-ADP        : k = 1E-6 : k = 1.0
 
 
 #ATP, lATP hydrolysis reactions.
