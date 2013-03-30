@@ -5,10 +5,15 @@
 
 rm -f kaiRust.0*
 rm -f *~
-rm -f avr*
+rm -f avr.*
+rm -f diff.*
+rm -f tot.*
 
 Gillespie_parse $1 > Gillespie.inp
 Gillespie
+
+#Execute Rustl data-generator file.
+data_Rust
 
 # Kondo model
 #ls *Cp* | Gillespie_add avr.Cp
@@ -23,13 +28,4 @@ Gillespie
 #ls *.Pi* | Gillespie_add avr.lPi
 #ls *.AC* | Gillespie_add avr.AC
 
-# Rust model
-ls kaiRust.0.ST* | Gillespie_add avr.ST
-ls kaiRust.0.SP* kaiRustl.0.SlP* | Gillespie_add avr.SP
-ls kaiRust.0.PP* kaiRustl.0.lPlP* kaiRustl.0.PlP* kaiRustl.0.lPP* | Gillespie_add avr.PP
-ls kaiRust.0.PT* kaiRustl.0.lPT* | Gillespie_add avr.PT
-
-#ls *.SlP* *.lPlP* *.lPlP* *.PlP* *.PlP* *.lPP* *.lPP* *.lPT* | Gillespie_add avr.lP
-#ls *lATP* | Gillespie_add avr.lATP
-#ls *lPi* | Gillespie_add avr.lPi
 

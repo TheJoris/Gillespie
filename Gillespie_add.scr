@@ -27,7 +27,7 @@ while read data; do
   files=( "${files[@]}" "$data" )
 done
 
-echo "Adding particle numbers in the following ${#files[@]} files:"
+echo "Adding particle numbers in the following ${#files[@]} files: [$1]"
 for i in `seq 0 ${#files[@]}` 
 do
   echo ${files[$i]}
