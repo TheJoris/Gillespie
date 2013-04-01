@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Data generator for the Rust model
+
+#kaiC not bound with kaiA
+ls kaiRust.0.ST* | Gillespie_add avr.ST
+ls kaiRust.0.SP* | Gillespie_add avr.SP
+ls kaiRust.0.PP* | Gillespie_add avr.PP
+ls kaiRust.0.PT* | Gillespie_add avr.PT
+ls avr.PP avr.PT avr.SP | Gillespie_add avr.Cp
+
+#KaiC bound with kaiA
+ls kaiRust.0.AST* | Gillespie_add avr.AST
+ls kaiRust.0.ASP* | Gillespie_add avr.ASP
+ls kaiRust.0.APP* | Gillespie_add avr.APP
+ls kaiRust.0.APT* | Gillespie_add avr.APT
+ls avr.APP avr.APT avr.ASP | Gillespie_add avr.ACp
+
+#Both kaiA and non kaiA bound kaiC.
+ls kaiRust.0.ST* kaiRust.0.AST* | Gillespie_add avr.TST
+ls kaiRust.0.SP* kaiRust.0.ASP* | Gillespie_add avr.TSP
+ls kaiRust.0.PP* kaiRust.0.APP* | Gillespie_add avr.TPP
+ls kaiRust.0.PT* kaiRust.0.APT* | Gillespie_add avr.TPT
+ls avr.PP avr.PT avr.SP avr.APP avr.APT avr.ASP | Gillespie_add avr.TCp
+
+# Total ADP in the system
+#ls kaiRust.0.ST-ADP | Gillespie_add tot.UD
+#ls kaiRust.0.SP-ADP kaiRustl.0.SlP-ADP | Gillespie_add tot.TD
+#ls kaiRust.0.PT-ADP kaiRustl.0.lPT-ADP | Gillespie_add tot.SD
+#ls kaiRust.0.PP-ADP kaiRustl.0.lPP-ADP kaiRustl.0.PlP-ADP kaiRustl.0.lPP-ADP | Gillespie_add tot.SD
+
+ls *-*ATP *.ATP | Gillespie_add avr.ATP
+ls *ADP | Gillespie_add avr.ADP
+
+Gillespie_diff avr.ADP diff.ADP
+Gillespie_diff avr.ATP diff.ATP
+Gillespie_diff kaiRust.0.Pi diff.Pi
