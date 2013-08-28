@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Read in a number of Gillespie particle number output files via PIPE
+# and average the particle numbers in each file, starting at a given timepoint. 
+# Summed timetrace is written to <output_file>.
+
+#Usage >ls -1 [regex] | Gillespie_rangeaverage.scr <timepoint> <output_file>
+
+# for i in {1..10}; do ls ./kaiKondo_$i/*Cp* | Gillespie_add avr.$i.Cp; done
+rm -f $2
+
+files=()
+while read data; do
+  files=( "${files[@]}" "$data" )
+done
+
+#${files[@]} = ls -d Kai2state_*[0-9]* | awk -F'_' '{print $NF, $0}' | sort -n | cut -d ' ' -f2-
+
+echo "Averaging particle numbers in the following ${#files[@]} files: [$2]"
+for i in `seq 0 ${#files[@]}` 
+do
+  echo ${files[$i]}
+done
+
+N_FILES=${#files[@]}
+N_FILES=`expr $N_FILES - 1`
+
+for i in `seq 0 $N_FILES`
+do
+  FILE=${files[$i]}  
+    
+  LINE_NBR=`cat $FILE | wc -l`
+  LINE_NBR=`expr $LINE_NBR - 1`
+  SAMPLE_NBR=`expr $LINE_NBR - $1`
+  
+  tail -n $SAMPLE_NBR $FILE >> schoen.dat
+  
+  echo "Averaging file: " $FILE " in range [$1:$LINE_NBR], which contains" $SAMPLE_NBR "samples."
+  
+  AVERAGE=( "${AVERAGE[@]}" `gawk -v sample_nbr="$SAMPLE_NBR" '{sum += $2 }; END {print sum/sample_nbr}' schoen.dat` )
+  rm schoen.dat
+done
+
+for i in `seq 0 ${#files[@]}` 
+do
+  echo ${AVERAGE[$i]} >> $2
+done
+
+for i in `seq 0 ${#files[@]}` 
+do
+  j=`expr $i + 1`
+  DATAPOINT=`gawk -v lnbr="$j" 'NR==lnbr {print $1}' PARAM1`
+  echo $DATAPOINT >> $2
+done

@@ -1,0 +1,204 @@
+# Four state kaiC model, with 2 nucleotide states: X-D,X-T.
+# Assuming phosphotrasfer from and to ATP/ADP only.
+# Only KaiA.
+
+Kai2KaiAB : code name
+0  : total eq
+50 : total prod
+.05 : time
+
+### ATP ADP Pi :components #Fixed chemical potentials
+
+# Free KaiC
+U-ATP T-ATP D-ATP S-ATP : components
+U-ADP T-ADP D-ADP S-ADP : components
+
+#KaiC sequestered with KaiA 
+AU-ATP AT-ATP AD-ATP AS-ATP : components
+AU-ADP AT-ADP AD-ADP AS-ADP : components
+
+#KaiC sequesterd with KaiB
+U_B-ATP T_B-ATP D_B-ATP S_B-ATP : components
+U_B-ADP T_B-ADP D_B-ADP S_B-ADP : components
+
+#KaiC sequesterd with KaiA and KaiB
+AU_B-ATP AT_B-ATP AD_B-ATP AS_B-ATP : components
+AU_B-ADP AT_B-ADP AD_B-ADP AS_B-ADP : components
+
+#KaiC sequesterd with KaiB-KaiA
+U_BA-ATP T_BA-ATP D_BA-ATP S_BA-ATP : components
+U_BA-ADP T_BA-ADP D_BA-ADP S_BA-ADP : components
+
+#KaiC sequesterd with KaiA and KaiB-KaiA
+AU_BA-ATP AT_BA-ATP AD_BA-ATP AS_BA-ATP : components
+AU_BA-ADP AT_BA-ADP AD_BA-ADP AS_BA-ADP : components
+
+A : components
+# B : components # We simulate KaiB in abundance, no explicit tracking of KaiB.
+
+
+### Nucleotide exchange AND hydrolysis in CII 
+
+#(No kaiA, No KaiB, No KaiB-KaiA)
+U-ATP <--> U-ADP           : k = 1.001 : k = 0.01
+T-ATP <--> T-ADP           : k = 1.001 : k = 0.01
+D-ATP <--> D-ADP           : k = 1.001 : k = 0.01
+S-ATP <--> S-ADP           : k = 1.001 : k = 0.01
+
+#(No kaiA, KaiB, No KaiB-KaiA)
+U_B-ATP <--> U_B-ADP       : k = 1.001 : k = 0.01
+T_B-ATP <--> T_B-ADP       : k = 1.001 : k = 0.01
+D_B-ATP <--> D_B-ADP       : k = 1.001 : k = 0.01
+S_B-ATP <--> S_B-ADP       : k = 1.001 : k = 0.01
+
+#(No kaiA, KaiB, KaiB-KaiA)
+U_BA-ATP <--> U_BA-ADP       : k = 1.001 : k = 0.01
+T_BA-ATP <--> T_BA-ADP       : k = 1.001 : k = 0.01
+D_BA-ATP <--> D_BA-ADP       : k = 1.001 : k = 0.01
+S_BA-ATP <--> S_BA-ADP       : k = 1.001 : k = 0.01
+
+
+#(kaiA, No KaiB, No KaiB-KaiA)
+AU-ATP <--> AU-ADP         : k = 1.1 : k = 1.0
+AT-ATP <--> AT-ADP         : k = 1.1 : k = 1.0
+AD-ATP <--> AD-ADP         : k = 1.1 : k = 1.0
+AS-ATP <--> AS-ADP         : k = 1.1 : k = 1.0
+
+#(kaiA, KaiB, No KaiB-KaiA)
+AU_B-ATP <--> AU_B-ADP         : k = 1.1 : k = 1.0
+AT_B-ATP <--> AT_B-ADP         : k = 1.1 : k = 1.0
+AD_B-ATP <--> AD_B-ADP         : k = 1.1 : k = 1.0
+AS_B-ATP <--> AS_B-ADP         : k = 1.1 : k = 1.0
+
+#(kaiA, KaiB, KaiB-KaiA)
+AU_BA-ATP <--> AU_BA-ADP         : k = 1.1 : k = 1.0
+AT_BA-ATP <--> AT_BA-ADP         : k = 1.1 : k = 1.0
+AD_BA-ATP <--> AD_BA-ADP         : k = 1.1 : k = 1.0
+AS_BA-ATP <--> AS_BA-ADP         : k = 1.1 : k = 1.0
+
+
+### kaiA binding to kaiC-CII
+
+#(No kaiA, No KaiB, No KaiB-KaiA)
+A + U-ATP <--> AU-ATP  : k = 1E0 : k = 1.0
+A + T-ATP <--> AT-ATP  : k = 4E0 : k = 1.0
+A + D-ATP <--> AD-ATP  : k = 1.6E1 : k = 1.0
+A + S-ATP <--> AS-ATP  : k = 4E0  : k = 1.0
+
+A + U-ADP <--> AU-ADP  : k = 1E0 : k = 1.0
+A + T-ADP <--> AT-ADP  : k = 4E0 : k = 1.0
+A + D-ADP <--> AD-ADP  : k = 1.6E1 : k = 1.0
+A + S-ADP <--> AS-ADP  : k = 4E0  : k = 1.0
+
+#(No kaiA, KaiB, No KaiB-KaiA)
+A + U_B-ATP <--> AU_B-ATP  : k = 1E0 : k = 1.0
+A + T_B-ATP <--> AT_B-ATP  : k = 4E0 : k = 1.0
+A + D_B-ATP <--> AD_B-ATP  : k = 1.6E1 : k = 1.0
+A + S_B-ATP <--> AS_B-ATP  : k = 4E0  : k = 1.0
+
+A + U_B-ADP <--> AU_B-ADP  : k = 1E0 : k = 1.0
+A + T_B-ADP <--> AT_B-ADP  : k = 4E0 : k = 1.0
+A + D_B-ADP <--> AD_B-ADP  : k = 1.6E1 : k = 1.0
+A + S_B-ADP <--> AS_B-ADP  : k = 4E0  : k = 1.0
+
+#(No kaiA, KaiB, KaiB-KaiA)
+A + U_BA-ATP <--> AU_BA-ATP  : k = 1E0 : k = 1.0
+A + T_BA-ATP <--> AT_BA-ATP  : k = 4E0 : k = 1.0
+A + D_BA-ATP <--> AD_BA-ATP  : k = 1.6E1 : k = 1.0
+A + S_BA-ATP <--> AS_BA-ATP  : k = 4E0  : k = 1.0
+
+A + U_BA-ADP <--> AU_BA-ADP  : k = 1E0 : k = 1.0
+A + T_BA-ADP <--> AT_BA-ADP  : k = 4E0 : k = 1.0
+A + D_BA-ADP <--> AD_BA-ADP  : k = 1.6E1 : k = 1.0
+A + S_BA-ADP <--> AS_BA-ADP  : k = 4E0  : k = 1.0
+
+
+### KaiB binding to KaiC-CI/CII
+## KaiB can bind bind to KaiC-D only!
+
+D-ATP <--> D_B-ATP     : k = .1 : k = 1E-6 
+D-ADP <--> D_B-ADP     : k = .1 : k = 1E-6
+
+AD-ATP <--> AD_B-ATP   : k = .1 : k = 1E-6
+AD-ATP <--> AD_B-ATP   : k = .1 : k = 1E-6
+
+S-ATP <--> S_B-ATP     : k = .1 : k = 1E-6 
+S-ADP <--> S_B-ADP     : k = .1 : k = 1E-6
+
+AS-ATP <--> AS_B-ATP   : k = .1 : k = 1E-6
+AS-ATP <--> AS_B-ATP   : k = .1 : k = 1E-6
+
+
+### KaiA sequestering by KaiC-KaiB complex.
+
+#A + D_B-ATP <--> D_BA-ATP   : k = 100. : k = 0.01
+#A + D_B-ADP <--> D_BA-ADP   : k = 100. : k = 0.01
+
+#A + AD_B-ATP <--> AD_BA-ATP : k = 100. : k = 0.01
+#A + AD_B-ADP <--> AD_BA-ADP : k = 100. : k = 0.01
+
+A + S_B-ATP <--> S_BA-ATP   : k = 100. : k = 0.01
+A + S_B-ADP <--> S_BA-ADP   : k = 100. : k = 0.01
+
+A + AS_B-ATP <--> AS_BA-ATP : k = 100. : k = 0.01
+A + AS_B-ADP <--> AS_BA-ADP : k = 100. : k = 0.01
+
+### Phosphotransfer reactions in CII.
+
+## Phosphotransfer without KaiB sequestered.
+
+# (No kaiA, No KaiB, No KaiB-KaiA)
+U-ATP <--> T-ADP          : k = 1.0    : k = 2.0     
+T-ATP <--> D-ADP          : k = 0.005  : k = 0.01    
+D-ADP <--> S-ATP          : k = 2.0    : k = 1.0  
+S-ADP <--> U-ATP          : k = 0.15   : k = 0.075
+
+# (kaiA, No KaiB, No KaiB-KaiA)
+AU-ATP <--> AT-ADP        : k = 2.0  : k = 1.0 
+AT-ATP <--> AD-ADP        : k = 2.0  : k = 1.0 
+AD-ADP <--> AS-ATP        : k = 0.5  : k = 1.0 
+AS-ADP <--> AU-ATP        : k = 0.05 : k = 0.1
+
+## Phosphotransfer with KaiB sequesterd:
+# KaiB can only be bound in S and D state.
+# The transition kinetics to U and T states is not altered but
+# results the dissociation of the KaiB_KaiA complex.
+
+# (No kaiA, KaiB, No KaiB-KaiA)
+D_B-ADP <--> S_B-ATP      : k = 2.0     : k = 1.0
+
+S_B-ADP <--> U-ATP        : k = 0.15    : k = 1E-10
+D_B-ADP <--> T-ATP        : k = 0.01    : k = 1E-10
+
+# (kaiA, KaiB, No KaiB-KaiA)
+AD_B-ADP <--> AS_B-ATP    : k = 0.5     : k = 1.0
+
+AS_B-ADP <--> AU-ATP      : k = 0.05    : k = 1E-10
+AD_B-ADP <--> AT-ATP      : k = 1.0     : k = 1E-10
+
+
+# (No kaiA, KaiB, KaiB-KaiA)
+D_BA-ADP <--> S_BA-ATP    : k = 2.0     : k = 1.0
+
+S_BA-ADP <--> U-ATP + A   : k = 0.15    : k = 1E-10
+D_BA-ADP <--> T-ATP + A   : k = 0.01    : k = 1E-10
+
+# (kaiA, KaiB, KaiB-KaiA)
+AD_BA-ADP <--> AS_BA-ATP  : k = 0.5     : k = 1.0
+
+AS_BA-ADP <--> AU-ATP + A : k = 0.05    : k = 1E-10
+AD_BA-ADP <--> AT-ATP + A : k = 1.0     : k = 1E-10
+
+
+
+
+### Initial conditions
+
+U-ATP == 4500  : initial
+U-ADP == 4500  : initial
+#T == 1500  : initial
+#D == 4000  : initial
+#S == 1500  : initial
+
+A == 5000 : initial
+# B == ... : initial 

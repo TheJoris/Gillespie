@@ -259,7 +259,7 @@ sub add_reaction
   else # no special identifier ==> strip
   {
     ( $HillComp, $HillConst, $HillCoeff ) = (0,0,0);
-    $kstr = sprintf( "%f", $kval );
+    $kstr = sprintf( "%f", $kval ); #TODO: change such that arithmic expression is conv. to number.
   }
 
   if( $time == 0 && $sigma == 0)

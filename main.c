@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   sys.doubling_time_std = 0;    // the doubling time is exact
   sys.last_division = NAN;      // to distinguish from given division times
   sys.growth_type = GROWTH_EXPONENTIAL;
-  sys.division_type = DIVIDE_BIONOMIALLY;
+  sys.division_type = DIVIDE_HALF;
   sys.output_stats = FALSE;
   sys.output_conc = OUTPUT_AUTOMATIC;
   sys.output_kaic = FALSE;

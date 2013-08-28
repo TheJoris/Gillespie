@@ -8,29 +8,23 @@
 
 # for i in {1..10}; do ls ./kaiKondo_$i/*Cp* | Gillespie_add avr.$i.Cp; done
 
-if [ $goethe ]
-then
-  read -p "$1 already exists. Remove? [Y/N] [ENTER]: " todo
-  if [ $todo == "Y" ]
-  then
-    rm -f $1
-  else
-    echo "Exiting program..."
-    exit 1
-  fi
-fi
-
 rm -f $1
 
+# Make list of files to add from input stream. Exclude empty files.
 files=()
 while read data; do
-  files=( "${files[@]}" "$data" )
+  FILE=$data
+  if [[ -s $FILE ]] ; then
+    files=( "${files[@]}" "$FILE" )
+  #else
+  #  echo "$FILE is empty."
+  fi;
 done
 
-echo "Adding particle numbers in the following ${#files[@]} files: [$1]"
-for i in `seq 0 ${#files[@]}` 
-do
-  echo ${files[$i]}
-done
+#echo "Adding particle numbers in the following ${#files[@]} files: [$1]"
+#for i in `seq 0 ${#files[@]}` 
+#do
+#  echo ${files[$i]}
+#done
 
 awk 'FNR==1{f++}{a[f,FNR]=$2; timepoints[FNR]=$1}END{for(x=1;x<=FNR;x++){{temp = 0 };for(y=1;y<ARGC;y++){temp += a[y,x]};{printf("%s %s", timepoints[x], temp); print ""};}}' ${files[@]} > $1

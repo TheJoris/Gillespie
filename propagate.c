@@ -423,8 +423,7 @@ void growth_init()
   else if( GROWTH_EXPONENTIAL == sys.growth_type )
   {
     growth_const = LOG2 / doubling_time;
-    volume_min = growth_const * doubling_time;
-    volume_min /= exp(volume_min) - 1.;
+    volume_min = sys.volume;
     
     growth_dt = .001 * doubling_time;
   }
@@ -456,7 +455,7 @@ void growth_step()
   if( sys.volume >= 2. * volume_min )
   {
 
-	//hier moet die productiesnelheid dan weer gehalveert worden		
+  	//hier moet die productiesnelheid dan weer gehalveert worden		
 	
     // reduce the volume
     sys.volume *= 0.5;
@@ -467,7 +466,7 @@ void growth_step()
     {
       if( !Xconst[i] )
       {
-        if( DIVIDE_BIONOMIALLY == sys.division_type )
+        if( DIVIDE_BINOMIALLY == sys.division_type )
           X[i] = ran_binomial( 0.5, X[i] );
         else if( DIVIDE_HALF == sys.division_type )
           X[i] /= 2;

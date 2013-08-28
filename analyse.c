@@ -203,7 +203,7 @@ void output_special( char *filename_total, char *filename_phos )
 
 /**
   Write out the gathered data into individual files for each component.
-  @param[in]  run   ID number of the run
+  @param[in] run ID number of the run
 */
 void analyse_finish( int run )
 {

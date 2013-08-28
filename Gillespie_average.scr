@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: Gell_average <Project file> <Output file>
+# Usage: Gillespie_average <Project file> <Output file>
 
 # Take all output files from Gillespie simulation in this directory 
 # and average them. Write (add) output to output file.

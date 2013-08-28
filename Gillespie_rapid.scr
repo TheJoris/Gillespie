@@ -1,19 +1,35 @@
 #!/bin/bash
 
-# Rappdif execution of Gillespie program. Both parsing and running in one go!
-# Usage > Gillespie_rapid [model_file.mdl]
+# Rappdif execution of Gillespie program. Parameter substitution, parsing and running in one go!
+# Usage > Gillespie_rapid [model_name].
 
-rm -f kaiRust.0*
+# Assumed naming of files: model_name.mdl (for final model file), 
+# model_name.mtp (for model template), model_name.par (for parameters)
+
+rm -f *.0.*
 rm -f *~
 rm -f avr.*
 rm -f diff.*
 rm -f tot.*
+rm -f *.tot
 
+#Get project name of model file.
+#PROJECT_NAME=`echo $INPUT_FILE | sed 's/\([0-9A-Za-z_-]*\).*/\1/'`
+PROJECT_NAME=$1
+
+# Define files considered.
+#MODEL_FILE=$PROJECT_NAME".mdl"
+#PARAM_FILE=$PROJECT_NAME".par"
+#TEMPL_FILE=$PROJECT_NAME".mtp"
+
+#Gillespie_parasub $PARAM_FILE $TEMPL_FILE $MODEL_FILE
+
+#Gillespie_parse $MODEL_FILE > Gillespie.inp
 Gillespie_parse $1 > Gillespie.inp
 Gillespie
 
 #Execute Rustl data-generator file.
-data_Rust
+#data_Rust
 
 # Kondo model
 #ls *Cp* | Gillespie_add avr.Cp
@@ -22,10 +38,30 @@ data_Rust
 #ls *ADP* | Gillespie_add avr.ADP
 #ls *.lPi* | Gillespie_add avr.lPi
 
-# Kondo et kaiA model
+# Kondo + kaiA model
 #ls *Cp* | Gillespie_add avr.Cp
 #ls *ADP* | Gillespie_add avr.ADP
 #ls *.Pi* | Gillespie_add avr.lPi
 #ls *.AC* | Gillespie_add avr.AC
 
+# KaiNew model
+#ls KaiANew.0.AU KaiANew.0.U | Gillespie_add U.tot
+#ls KaiANew.0.AT KaiANew.0.T | Gillespie_add T.tot
+#ls KaiANew.0.AS KaiANew.0.S | Gillespie_add S.tot
+#ls KaiANew.0.AD KaiANew.0.D | Gillespie_add D.tot
 
+# Kai2KaiAB model
+#/home/paijmans/Gillespie/Kai2KaiAB_ms/data_2KaiAB.scr
+#/home/paijmans/Gillespie/Kai2Rust/data_2KaiAB.scr
+#gnuplot gplot_KaiB.cfg
+#gnuplot gplot_totST.cfg
+#gnuplot gplot_KaiA.cfg
+
+#Three State Oscillator
+#/home/paijmans/Gillespie/ThreeStateOscillator/data_3SO.scr
+
+# Kai2NEF model
+#/home/paijmans/Gillespie/Kai2NEF/data_Kai2NEF.scr
+#gnuplot gplot_KaiB.cfg
+#gnuplot gplot_totST.cfg
+#gnuplot gplot_sequestration.cfg
