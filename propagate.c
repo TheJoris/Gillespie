@@ -10,7 +10,6 @@
 #include "propagate.h"
 #include "queue.h"
 
-
 /*------------------------Locally defined functions-------------------------*/
 
 void calculate_components();
@@ -22,6 +21,7 @@ void update_concentrations_queuereactants( int j );
 void update_concentrations_queueproducts( int j );
 void update_propensity_functions( int *ids, int len );
 void calculate_volume();
+
 void growth_init();
 void growth_step();
 void growth_dependent_reactions();
@@ -31,10 +31,12 @@ void growth_dependent_reactions();
 double sum_a,         ///< total of the propensity function over all reaction channels
        volume_min,    ///< minimal volume, which should be reached right after division
        growth_const,  ///< constant which is precalculated for the growth
-       growth_dt;     ///< time between two successive volume increases
+       growth_dt,     ///< time between two successive volume increases
+       ccycle_duptime;///< Time of next gene duplication in current cell cycle.
 
-int gdrl ;			  //length of the gdr array == number of volume dependent reactions
+int gdrl;			  //length of the gdr array == number of volume dependent reactions
 
+    
 /**
   Do central calculations.
   This is the core function of the program having most of the logic for each time step.
@@ -54,6 +56,7 @@ void run( int run, double total_time, long total_steps )
 
   // initialize variables
   sys.tau = sys.tau_init;
+  sys.current_gene_copynbr = sys.init_gene_copynbr;
   steps = 0;
   analyse_init();
   if( sys.output_stats )
@@ -62,7 +65,7 @@ void run( int run, double total_time, long total_steps )
   // initialize growth, if neccessary
   if( HAS_GROWTH )
   {  
-	  growth_dependent_reactions();
+    growth_dependent_reactions();
 	  growth_init();
  	  last_volume_update = sys.tau - 2.*growth_dt; // make sure, volume is set before first calculation
   }
@@ -77,15 +80,16 @@ void run( int run, double total_time, long total_steps )
 
   // run until final time or final number of steps is reached
   while( sys.tau < sys.tau_init + total_time && steps < total_steps )
-  {
-    
-    // check if volume should be updated
-    if( HAS_GROWTH && last_volume_update + growth_dt <= sys.tau )
+  {   
+    // check if volume or gene copy number should be updated
+    if( HAS_GROWTH && sys.tau >= last_volume_update + growth_dt )
     {
-      // Update volume and divide if necessary,
+      // Store time of this volume update.
+      last_volume_update = sys.tau;
+    
+      // Update volume or #gene and divide if necessary,
 	    // influenced propensities are updated.
       growth_step();
-      last_volume_update = sys.tau;
     }
     
     // advance the step counter and save current status
@@ -157,7 +161,6 @@ void run( int run, double total_time, long total_steps )
       // check if an reaction has already be determined (came off queue)
       if( react >= 0 ) 
       {
-
         update_concentrations_queueproducts( react );
       }
       else // no reaction determined => draw Poissonian one
@@ -184,8 +187,6 @@ void run( int run, double total_time, long total_steps )
 
       }
     }
-    
-    //calculate_components();						//knocked out
   }
 
   // output statistics about the whole run
@@ -260,7 +261,7 @@ void update_propensity_functions( int *ids, int len )
     
     // check if the reaction constant is definied by a Hill-function
     if( r->HillComp >= 0 )
-    {
+    {    
       if ( r->HillCoeff > 0 )
       {
         // calculate reaction constant for activation
@@ -391,26 +392,34 @@ void calculate_volume()
 {
   if( GROWTH_LINEAR == sys.growth_type )
   {
-    sys.volume = volume_min + growth_const*(sys.tau-sys.last_division);
+    sys.volume = volume_min + growth_const * (sys.tau - sys.last_division);
   }
   else if( GROWTH_EXPONENTIAL == sys.growth_type ) 
   {
-    sys.volume = volume_min * exp( growth_const*(sys.tau-sys.last_division) );
+    sys.volume = volume_min * exp( growth_const*(sys.tau - sys.last_division) );
   }
 }
 
 
 /**
-  Initializes the growth process.
+  Initializes a new cell cycle.
 */
 void growth_init()
 {
-  double doubling_time; //< drawn doubling time for the current growth process
+  double doubling_time; //< tentative doubling time for the current growth process.
   
   // draw a doubling time from a Gaussian distribution
   do
     doubling_time = sys.doubling_time + ran_gaussian( sys.doubling_time_std );
-  while ( sys.tau >= sys.last_division + doubling_time ); // make sure the next event is in the future
+  while ( sys.tau >= sys.last_division + doubling_time ); 
+  
+  // draw duplication time from Gaussian distribution.
+  // Make sure duplication time lies inside the cell cycle time.
+  do {
+    ccycle_duptime = doubling_time * sys.duplication_phase + 
+      ran_gaussian( doubling_time * sys.duplication_phase_std ); }
+  while ( sys.tau >= sys.last_division + ccycle_duptime || ccycle_duptime >= doubling_time ); 
+  ccycle_duptime += sys.last_division;
   
   // precalculation for the volume
   if( GROWTH_LINEAR == sys.growth_type )
@@ -423,7 +432,7 @@ void growth_init()
   else if( GROWTH_EXPONENTIAL == sys.growth_type )
   {
     growth_const = LOG2 / doubling_time;
-    volume_min = sys.volume;
+    volume_min = 1.0;
     
     growth_dt = .001 * doubling_time;
   }
@@ -447,21 +456,15 @@ void growth_step()
   
   calculate_volume();
 
- if( sys.volume >= 1.5 * volume_min )
-	{
-		//hier moet iets komen dat de productiesnelheid verdubbelt
-	}
-
   if( sys.volume >= 2. * volume_min )
   {
-
-  	//hier moet die productiesnelheid dan weer gehalveert worden		
-	
-    // reduce the volume
-    sys.volume *= 0.5;
+    // store time of cell division.
     sys.last_division = sys.tau;
+
+    //initialize the next growth period
+    growth_init();
   
-    // distribute chemical species binomially
+    // distribute chemical species between cells.
     for( i=0; i<sys.Ncomp; ++i )
     {
       if( !Xconst[i] )
@@ -476,23 +479,45 @@ void growth_step()
           abort();
         }
       }
-	  //determine_propensity_functions(); //FOUT
     }
   
     // disregard half the items on the queue
     if( sys.needs_queue )
-    {
       queue_disregard_randomly( 0.5 );
+
+    // Half all prefactors of Hill functions with 'CanDuplicate' on
+    for( i=0; i<sys.Nreact; ++i )
+    {
+      if( R[i].HillComp >= 0 ) 
+      {
+        if ( R[i].CanDuplicate )
+        {
+          R[i].Hillk = R[i].Hillk0 * sys.init_gene_copynbr;
+          sys.current_gene_copynbr = sys.init_gene_copynbr;  
+        }
+      }
     }
 
-	  //Update all propensities.
+	  //Update all propensities (All numbers have changed).
 	  determine_propensity_functions();
-    
-    //initialize the next growth period
-    growth_init();
   }
-  else{ //Volume has grown but dit not divide.
-	  //Only update those propensities which change under growth
+  else{ 
+    // check if genes duplicate.
+	  if( sys.tau >= ccycle_duptime && sys.current_gene_copynbr < 2 * sys.init_gene_copynbr )
+	  {
+	    for( i=0; i<sys.Nreact; ++i )
+      {
+        if( R[i].HillComp >= 0 )
+        {
+          if ( R[i].CanDuplicate )
+          {
+            R[i].Hillk = R[i].Hillk0 * (++sys.current_gene_copynbr);
+          }  
+        }
+      }
+	  }
+
+	  //update propensities which change under growth.
     update_propensity_functions( gdr, gdrl );
   }
 }
@@ -505,7 +530,7 @@ void growth_dependent_reactions()
 	
 	for( i=0; i<sys.Nreact; ++i )
 	{
-		if( 2 == R[i].Nreact|| R[i].HillComp >= 0)
+		if( 2 == R[i].Nreact || R[i].HillComp >= 0)
 		{
 			gdr[j] = i ;
 			j++ ;

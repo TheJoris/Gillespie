@@ -82,16 +82,19 @@ void read_reactions()
       for( i=0; i<sys.Nreact; i++ )
       {
         
-        fscanf( fp, "%lg %d %d %lg %lg %d %lg %lg %s\n",
+        fscanf( fp, "%lg %d %d %lg %lg %d %lg %lg %d %s\n",
                 &R[i].k, &R[i].Nreact, &R[i].Nprod, &R[i].time, &R[i].sigma,
-                &R[i].HillComp, &R[i].HillConst, &R[i].HillCoeff, &dummy
+                &R[i].HillComp, &R[i].HillConst, &R[i].HillCoeff, &R[i].CanDuplicate, &dummy
               );
-        R[i].Hillk = R[i].k; // copy rate constant to Hill prefactor
+        R[i].Hillk0 = R[i].k; // copy rate constant to Hill prefactor
+        
+        R[i].Hillk = R[i].Hillk0 * sys.init_gene_copynbr;
         
         // check, if the reaction constant is defined by an Hill function
         if( R[i].k == 0 || R[i].HillConst == 0 || R[i].HillComp < 0)
         {
           R[i].HillComp = -1;
+          R[i].CanDuplicate = 0;
         }
 
         // scan reactants

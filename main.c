@@ -55,6 +55,9 @@ int main(int argc, char *argv[])
   sys.volume = 1.;              // initial volume factor
   sys.doubling_time = -1;       // no growth at all
   sys.doubling_time_std = 0;    // the doubling time is exact
+  sys.duplication_phase = .5; // Phase of cell cycle when genome doubles.
+  sys.duplication_phase_std = 0; // Std deviation in gene doubling.
+  sys.init_gene_copynbr = 1; // Number of gene doublings before doubling whole genome.
   sys.last_division = NAN;      // to distinguish from given division times
   sys.growth_type = GROWTH_EXPONENTIAL;
   sys.division_type = DIVIDE_HALF;
@@ -218,6 +221,7 @@ int start()
   fscanf( fp, "%lg%*s", &sys.dt );
   fscanf( fp, "%lg\t%lg%*s", &tau_equi, &tau_prod );
   fscanf( fp, "%lg\t%lg%*s", &sys.doubling_time, &sys.doubling_time_std );
+  fscanf( fp, "%lg\t%lg\t%d%*s", &sys.duplication_phase, &sys.duplication_phase_std, &sys.init_gene_copynbr );
   
   // convert the number of blocks, which the calculation should run, into steps
   // or set it to the maximum number, when it should be neglected
@@ -260,6 +264,7 @@ int start()
   if( HAS_GROWTH )
   {
     printf( "Doubling time                     %8f +- %8f\n", sys.doubling_time, sys.doubling_time_std );
+    printf( "Duplication phase                  %8f +- %8f, Number of gene duplications: %d\n", sys.duplication_phase, sys.duplication_phase_std, sys.init_gene_copynbr );   
   }
 
   // use this information to allocate memory and read in components and reactions
@@ -316,8 +321,8 @@ int start()
       fprintf( stderr, "Growth is linear\n" );
       if( isnan( sys.last_division ) )
       {
-        // set last_division such that volume(0)=1.
-        sys.last_division = sys.tau_init - 0.5*sys.doubling_time;
+        // set last_division to current time.
+        sys.last_division = sys.tau_init;
       }
     }
     else if ( sys.growth_type == GROWTH_EXPONENTIAL )
@@ -325,8 +330,8 @@ int start()
       fprintf( stderr, "Growth is exponential\n" );
       if( isnan( sys.last_division ) )
       {
-        // set last_division such that volume(0)=1.
-        sys.last_division = sys.tau_init - 0.528766*sys.doubling_time;
+        // set last_division to current time.
+        sys.last_division = sys.tau_init;// - 0.528766*sys.doubling_time;
         // 0.528766 == -log(log(2))/log(2)
       }
     }
@@ -473,9 +478,9 @@ void print_reactions( boolean show_count )
     }
     else
     {
-      printf( "\tk = %4.3f * [%s]^n / ( K^n+[%s]^n ), K=%4.3f, n=%.1f",
-              R[i].Hillk, Xname[R[i].HillComp], Xname[R[i].HillComp], R[i].HillConst, R[i].HillCoeff
-            );
+      printf( "\tk = %4.3f * [%s]^n / ( K^n+[%s]^n ), K=%4.3f, n=%.1f, CanDuplicate=%1d",
+              R[i].Hillk, Xname[R[i].HillComp], Xname[R[i].HillComp], R[i].HillConst, 
+                R[i].HillCoeff, R[i].CanDuplicate );
     }
     
     if( R[i].time > 0 || R[i].sigma > 0 )
@@ -640,9 +645,9 @@ void get_reaction_network()
       // check, if Hillfunction is influenced
       if( R[j].HillComp >= 0 && R[j].HillConst != 0 &&
           ( c[R[j].HillComp] != 0 || Xconst[R[j].HillComp] == 2 ) )
-	{
+	    {
         r[n_r++] = j;
-	}
+	    }
       
       next: continue; // check the next reaction
     }

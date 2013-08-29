@@ -17,7 +17,8 @@ typedef struct analyseData_type {
          *X,       ///< array of the concentrations of the components
          volume;   ///< volume of the simulation
   long long int ns,          ///< number of total steps 
-      queuelength; ///< length of the queue
+      queuelength, ///< length of the queue
+      current_gene_copynbr;
 } AnalyseData;
 
 /*------------------------Globally defined functions-------------------------*/
@@ -81,6 +82,8 @@ void analyse( long long int steps )
     adata[adata_id].ns = steps;
     adata[adata_id].queuelength = queue_length();
     adata[adata_id].volume = sys.volume;
+    adata[adata_id].current_gene_copynbr = sys.current_gene_copynbr;
+    
     
     // copy concentrations
     for( i=0; i<sys.Ncomp; i++ )
@@ -295,14 +298,31 @@ void analyse_finish( int run )
     fp = fopen( filename, "w" );
   
     // write header
-    fprintf(fp,"#time\tvolume\tstep\n");
+    fprintf(fp,"#time\tvolume\n");
   
     // iterate through all steps
     for( j=0; j<adata_id; j++ ) 
     {
       fprintf( fp, "%e\t", adata[j].tau );
-      fprintf( fp, "%e\t", adata[j].volume );
-      fprintf( fp, "%lld\n", adata[j].ns );
+      fprintf( fp, "%e\n", adata[j].volume );
+    }
+    
+    // close file
+    fclose(fp);
+    
+    // Same for gene copy number in cell cycle.
+    // open file for writing the queue
+    sprintf( filename, "%s.%d.gene_copynbr", sys.name, run );
+    fp = fopen( filename, "w" );
+  
+    // write header
+    fprintf(fp,"#time\tgene_copynbr\n");
+  
+    // iterate through all steps
+    for( j=0; j<adata_id; j++ ) 
+    {
+      fprintf( fp, "%e\t", adata[j].tau );
+      fprintf( fp, "%d\n", adata[j].current_gene_copynbr );
     }
     
     // close file

@@ -38,7 +38,7 @@
 
 // division types
 #define DIVIDE_HALF         0
-#define DIVIDE_BIONOMIALLY  1
+#define DIVIDE_BINOMIALLY  1
 
 /**
   Fake boolean type
@@ -83,7 +83,9 @@ typedef struct sys_type
           Nreact,        ///< Number of reactions
           needs_queue,   ///< Switch determining, if the simulation needs a queue
           growth_type,   ///< Equation to use for determining the growth type
-          division_type; ///< Determines the method used for division
+          division_type, ///< Determines the method used for division
+          init_gene_copynbr, ///< number of gene copies in the cell at the start of the cell cycle.
+          current_gene_copynbr; ///> number of gene copies at the current phase of the cell cycle.
   long    stats_steps,   ///< Number of steps calculation inbetween each output
           equi_steps,    ///< Number of steps for the first run
           prod_steps;    ///< Number of steps for the second run
@@ -91,6 +93,8 @@ typedef struct sys_type
           doubling_time, ///< Doubling time of the bacterium
           doubling_time_std, ///< Standard deviation of the doubling time
           last_division, ///< Time of the last division
+          duplication_phase, ///< Fraction of doubling_time where gene duplication happens [0,1).
+          duplication_phase_std, ///< Standard deviation of the duplication time.
           tau,           ///< Current time
           tau_init,      ///< Time of previous runs, read from input-file
           dt;            ///< Time step of data write out
@@ -129,11 +133,14 @@ typedef struct reaction_type
          time,      ///< average delay of the reaction 
          sigma;     ///< sigma of the Gaussian distribution used for specifing the delay
   // reactions of Hill type
-  int    HillComp;  ///< Index of the component used in the Hill function
-  double Hillk,     ///< Prefactor of the Hill function
-         HillCoeff, ///< The Hill coefficient
-         HillConst; ///< The concentration of the HillComp, which is necessary for half occupation (=microscopic dissociation constant)
-  // involved components
+  int    HillComp,  ///< Index of the component used in the Hill function
+         CanDuplicate;///< Bollean if the gene is duplicated during cell cycle.
+  double Hillk,     ///< Prefactor of the Hill function; k = k0 * active_genes.
+         Hillk0,    ///< Prefactor for Hillfunction for a single gene.
+         HillCoeff, ///< The Hill coefficient, n
+         HillConst; ///< The concentration of the HillComp for half maximum effect, K
+
+        
   Stoch  react[2],      ///< Array for describing the reactants
          prod[MAXPROD]; ///< Array for describing the products
 

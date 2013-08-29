@@ -22,7 +22,10 @@ sub InitAll
   $time_step = 0.1;
   $volume = 1.0;
   $doubling_time = -1.; # no growth at all
-#   $doubling_time_std = 0; # exact doubling time
+  $doubling_time_std = 0; # exact doubling time
+  $duplication_phase = 0;
+  $duplication_phase_std = 0;
+  $init_gene_copynbr = 0;  
   $help = <<EOF;
 
 Parses schematic reaction files and generates an input file for Gillespie
@@ -52,6 +55,9 @@ resets default values.  The <identifier> is from the following table
  volume factor                 "vol"                        1
  doubling time                 "doubling"                   -1
  doubling time noise           "std"                        0
+ duplication time              "duplication" "time"         0
+ duplication time noise        "duplication" "std"          0
+ number of duplications        "duplication" "nbr"       1.
  global degradation rate       "degradation"                0.
 -------------------------------------------------------------------------
 
@@ -63,6 +69,9 @@ Changing the code name also has the effect of changing the file names.
 Setting the volume factor only affects reaction constants and initial conditions 
 below the respective line, so it should be one of the first things to set.
 A negative doubling time defaults to no growth.
+
+The number of genes in the cell is given by the parameter 'duplication number'. These genes
+are duplicated N -> 2N equally spaced in cell cycle time at 'duplication time' intervals with a standard deviation of 'duplication std'. When a gene is duplicated, the prefactor of the Hill function modelling the gene expression is increased as k = k0 * (duplication number + doubling till this time).
 
 4. A line of the type
  <space_separated_list_of_components> : components
@@ -129,10 +138,12 @@ The delays will be Gaussian distributed with mean <val_T> and standard deviation
 
 10. Instead of a constant value for the reaction constant k, the following
 may be used to denote Hill function dependence:
- A --> B : k = Hill(k0,X,K,n)
+ A --> B : k = Hill(k0,X,K,n,duplicated)
 which translates to
 k = k0 * [X]^n / ( [X]^n + K^n )
-Please note that repression can be modelled using negative exponents n.
+Please note that repression can be modelled using negative exponents n. 
+Duplicated is a boolean giving if the hill function is modelling gene expression
+of a gene which is halfed and doubled during the cell cycle.
 
 At the end, reaction and component files suitable for direct reading
 by Gillespie code are generated.  Standard output can be redirected to
@@ -250,15 +261,16 @@ sub add_reaction
   if ($kval =~ /Hill\((.*)\)/)
   {
     # found Hill function type ==> extract values
-    ( $kval, $HillComp, $HillConst, $HillCoeff ) =  split(",",$1,4);
+    ( $kval, $HillComp, $HillConst, $HillCoeff, $CanDuplicate ) =  split(",",$1,5);
     $HillComp = component_id( $HillComp );
     $HillConst =~ s/\s//g;
     $HillCoeff =~ s/\s//g;
-    $kstr = sprintf( "Hill(%f,%s,%f,%f)", $kval, @name_list[$HillComp], $HillConst, $HillCoeff );
+    $CanDuplicate =~ s/\s//g;
+    $kstr = sprintf( "Hill(%f,%s,%f,%f,%i)", $kval, @name_list[$HillComp], $HillConst, $HillCoeff, $CanDuplicate );
   }
   else # no special identifier ==> strip
   {
-    ( $HillComp, $HillConst, $HillCoeff ) = (0,0,0);
+    ( $HillComp, $HillConst, $HillCoeff, $CanDuplicate ) = (0,0,0,0);
     $kstr = sprintf( "%f", $kval ); #TODO: change such that arithmic expression is conv. to number.
   }
 
@@ -359,8 +371,8 @@ sub add_reaction
 
   # set the parameter output line
   $line1 = sprintf(
-            "%f\t%i\t%i\t%f\t%f\t%i\t%f\t%f\tRateConstantk_Nreactants_Nproducts_Time_Sigma_HillComp_HillConst_HillCoeff",
-            $kval,$nreacts,$nprods,$time,$sigma,$HillComp,$HillConst,$HillCoeff
+            "%f\t%i\t%i\t%f\t%f\t%i\t%f\t%f\t%i\tRateConstantk_Nreactants_Nproducts_Time_Sigma_HillComp_HillConst_HillCoeff_CanDuplicate",
+            $kval,$nreacts,$nprods,$time,$sigma,$HillComp,$HillConst,$HillCoeff,$CanDuplicate
            );
 
   # save the lines
@@ -444,6 +456,27 @@ sub parseline
         $num_steps = $front;
         $num_steps =~ s/\s//g;
         printf STDERR "Setting # steps to %i\n", $num_steps;
+      }
+    }
+    elsif ($back =~ /duplication/)
+    {
+      if ($back =~ /time/)
+      {
+        $duplication_phase = $front;
+        $duplication_phase =~ s/\s//g;
+        printf STDERR "Setting gene duplication time to %f\n", $duplication_phase;
+      }
+      elsif ($back =~ /std/)
+      {
+        $duplication_std = $front;
+        $duplication_std =~ s/\s//g;
+        printf STDERR "Setting gene duplication time standard deviation to %f\n", $duplication_std;
+      }
+      elsif ($back =~ /nbr/)
+      {
+        $init_gene_copynbr = $front;
+        $init_gene_copynbr =~ s/\s//g;
+        printf STDERR "Setting # of duplication events per cell cycle to %i\n", $init_gene_copynbr;
       }
     }
     elsif ($back =~ /doubling/)
@@ -672,6 +705,7 @@ sub WriteGillespieInp
   printf "%f\t\t\tTime_step\n",$time_step;
   printf "%f\t%f\t\tTotal_time\n\n",$total_time_equi,$total_time_run;
   printf "%f\t%f\t\tDoubling_time\n\n", $doubling_time, $doubling_time_std;
+  printf "%f\t%f\t%i\t\tduplication_phase\n\n", $duplication_phase, $duplication_phase_std, $init_gene_copynbr;
 }
 
 # This is where the action starts.
