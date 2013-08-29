@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
   sys.volume = 1.;              // initial volume factor
   sys.doubling_time = -1;       // no growth at all
   sys.doubling_time_std = 0;    // the doubling time is exact
-  sys.duplication_phase = .5; // Phase of cell cycle when genome doubles.
-  sys.duplication_phase_std = 0; // Std deviation in gene doubling.
+  sys.duplication_phase = .0; // Phase of cell cycle when genome doubles.
+  sys.duplication_phase_std = 0.; // Std deviation in gene doubling.
   sys.init_gene_copynbr = 1; // Number of gene doublings before doubling whole genome.
   sys.last_division = NAN;      // to distinguish from given division times
   sys.growth_type = GROWTH_EXPONENTIAL;
