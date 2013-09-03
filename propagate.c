@@ -418,7 +418,7 @@ void growth_init()
   do {
     ccycle_duptime = doubling_time * sys.duplication_phase + 
       ran_gaussian( doubling_time * sys.duplication_phase_std ); }
-  while ( sys.tau >= sys.last_division + ccycle_duptime || ccycle_duptime >= doubling_time ); 
+  while ( sys.tau > sys.last_division + ccycle_duptime || ccycle_duptime >= doubling_time ); 
   ccycle_duptime += sys.last_division;
   
   // precalculation for the volume
@@ -492,8 +492,25 @@ void growth_step()
       {
         if ( R[i].CanDuplicate )
         {
-          R[i].Hillk = R[i].Hillk0 * sys.init_gene_copynbr;
-          sys.current_gene_copynbr = sys.init_gene_copynbr;  
+          //Only half gene copynbr, when gene duplication is not at cell division.
+          if( ccycle_duptime > sys.last_division ) 
+          {   
+            R[i].Hillk = R[i].Hillk0 * sys.init_gene_copynbr;
+            sys.current_gene_copynbr = sys.init_gene_copynbr;
+          
+            //Register duplication as data.      
+            duplications.time[duplications.cntr] = sys.tau;
+            duplications.number[duplications.cntr] = sys.init_gene_copynbr;
+            duplications.cntr++;
+          }
+          else
+          {
+            duplications.time[duplications.cntr] = sys.tau;
+            duplications.number[duplications.cntr] = sys.init_gene_copynbr;
+            duplications.time[duplications.cntr+1] = sys.tau;
+            duplications.number[duplications.cntr+1] = 2*sys.init_gene_copynbr;
+            duplications.cntr += 2;        
+          }          
         }
       }
     }
@@ -512,6 +529,9 @@ void growth_step()
           if ( R[i].CanDuplicate )
           {
             R[i].Hillk = R[i].Hillk0 * (++sys.current_gene_copynbr);
+            duplications.time[duplications.cntr] = sys.tau;
+            duplications.number[duplications.cntr] = sys.current_gene_copynbr;
+            duplications.cntr++;
           }  
         }
       }

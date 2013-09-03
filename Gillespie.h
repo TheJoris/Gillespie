@@ -155,6 +155,14 @@ typedef struct int_array
       *val; ///< A pointer to the first element
 } IntArray;
 
+typedef struct eventpair_type 
+{
+  double *time; ///< Store event times
+  int *number,  ///< of when the number changes
+  len,          ///< so many times.
+  cntr;         /// Counter of current position in array.
+} Eventpair;
+
 /*-----------------------Externally declared variables----------------------*/
 
 extern Sys      sys;          ///< general information on the system
@@ -166,6 +174,7 @@ extern int      **Xcalc;      ///< array for the components from which the value
 extern int      *Xcalc_count; ///< size of the previous array
 extern double   *a;           ///< array for the propensity function of each reaction channel
 extern int	*gdr;	      ///array of reactions whose propensity functions chance when the volume chances
+extern Eventpair duplications; ///storing all the gene duplication events.
 extern React    *R;           ///< array of structs used to store the reaction channels
 extern IntArray *react_network; ///< array containting structural information about the reaction network
 

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Quickly run Mark's analyseprogramma.
+
+# >Gillespie_analyse_rapid <filename> <avg_period>
+
+PROJECT_NAME=$1
+AVG_PERIOD=$2
+
+Gillespie_analyse -a 1000 -i $PROJECT_NAME".C" -b $PROJECT_NAME".gene_copynbr" -d 1 -f 0 -k $AVG_PERIOD -l 0.1 -u 10

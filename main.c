@@ -26,9 +26,10 @@ boolean  *Xconst;        ///< array stating if the respective component is const
 int      **Xcalc;        ///< array for the components from which the value is calculated
 int      *Xcalc_count;   ///< size of the previous array
 double   *a;             ///< array for the propensity function of each reaction channel
-int	 *gdr ;		         ///< array of reactions whose propensity functions chance when the volume chances
+int	 *gdr ;		           ///< array of reactions whose propensity functions chance when the volume chances
 React    *R;             ///< array of structs used to store the reaction channels
 IntArray *react_network; ///< array containting structural information about the reaction network
+Eventpair duplications;  ///< Store all duplication events.
 
 /*------------------------Locally defined functions--------------------------*/ 
 
@@ -186,7 +187,6 @@ int main(int argc, char *argv[])
 
 	// load data from files and initialize program
   start();
-
 	
 	// cleanup
   return finish ();
@@ -240,7 +240,7 @@ int start()
     tau_equi = INF_POS;
   if( tau_prod < 0 )
     tau_prod = INF_POS;
-  
+    
   // close file
   fclose(fp);
 
@@ -268,11 +268,16 @@ int start()
   }
 
   // use this information to allocate memory and read in components and reactions
-
   allocate_memory();
   read_components();
   read_reactions();
   get_reaction_network();
+
+  //Set duplication events array.
+  duplications.len = (int) tau_prod / sys.doubling_time;
+  duplications.cntr = 0;
+  duplications.time = malloc( 2 * duplications.len * sizeof( double ) );
+  duplications.number = malloc( 2 * duplications.len * sizeof( double ) );
   
   // check, if the state of the system has to be loaded from a file
   if( sys.input != NULL )

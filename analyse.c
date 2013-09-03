@@ -81,9 +81,7 @@ void analyse( long long int steps )
     adata[adata_id].tau = adata_time;
     adata[adata_id].ns = steps;
     adata[adata_id].queuelength = queue_length();
-    adata[adata_id].volume = sys.volume;
-    adata[adata_id].current_gene_copynbr = sys.current_gene_copynbr;
-    
+    adata[adata_id].volume = sys.volume;  
     
     // copy concentrations
     for( i=0; i<sys.Ncomp; i++ )
@@ -317,12 +315,14 @@ void analyse_finish( int run )
   
     // write header
     fprintf(fp,"#time\tgene_copynbr\n");
+    
+    printf("dup cntr/len: %d / %d\n",duplications.cntr,duplications.len);
   
     // iterate through all steps
-    for( j=0; j<adata_id; j++ ) 
+    for( j=0; j<duplications.cntr; j++ ) 
     {
-      fprintf( fp, "%e\t", adata[j].tau );
-      fprintf( fp, "%d\n", adata[j].current_gene_copynbr );
+      fprintf( fp, "%e\t", duplications.time[j] );
+      fprintf( fp, "%d\n", duplications.number[j] );
     }
     
     // close file

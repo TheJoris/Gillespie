@@ -1,4 +1,18 @@
 #!/usr/bin/perl
+#Give project name of KaiModel Gillespie output as only argument.
+# NOT including '.0.' part!
+
+
+# OUTPUT is:
+
+# <project_name>.CA       : KaiC seq. with KaiA. (On CII)
+# <project_name>.CAB      : KaiC seq. with KaiB seq. KaiA.
+# <project_name>.CB       : KaiC seq. with KaiB.
+# <project_name>.Cfree    : Non sequestered KaiC (norm + inactive, int over p).
+# <project_name>.tmin.Np  : -
+# <project_name>.Puw      : Fraction of hexamers with phosho. level > 0.
+# <project_name>.Pw       : Av. phospho level of hexamers: 1/(6 * CT) sum_i (p * C_p_i).
+
 $|=1;
 
 
@@ -144,51 +158,66 @@ print "Tmin is $T[0][$tmin]\n";
 
 $file = "$Name.$tmin.Np\n";
 open(FILE,">$file");
+printf FILE "phospho - # of KaiC in phospho. states [0,6] \n";
 for ($p = 0; $p < 7; $p++) {
-    printf FILE "%d %d\n",$p,$C[$p][$tmin];
+    printf FILE "%d\t%d\t0\n",$p,$C[$p][$tmin];
 }
 close(FILE);
 
 $file = "$Name.Pw";
 open(FILE,">$file");
+printf FILE "time - sum_i i * C_i /(6 * CT) (i>0) \n";
 for ($t=0;$t<$tt;$t++) {
-    printf FILE "%f %f\n",$T[$0][$t],$Pw[$t];
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$Pw[$t];
 }
 close(FILE);
 
 $file = "$Name.Puw";
 open(FILE,">$file");
+printf FILE "time - sum_i C_i /CT (i>0) \n";
 for ($t=0;$t<$tt;$t++) {
-    printf FILE "%f %f\n",$T[$0][$t],$Puw[$t];
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$Puw[$t];
 }
 close(FILE);
 
 $file = "$Name.Cfree";
 open(FILE,">$file");
+printf FILE "time - non seq. KaiC \n";
 for ($t=0;$t<$tt;$t++) {
-    printf FILE "%f %f\n",$T[$0][$t],$CfT[$t];
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$CfT[$t];
 }
 close(FILE);
 
 $file = "$Name.CA";
 open(FILE,">$file");
+printf FILE "time - KaiC-KaiA (on CII) \n";
 for ($t=0;$t<$tt;$t++) {
-    printf FILE "%f %f\n",$T[$0][$t],$CAT[$t];
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$CAT[$t];
 }
 close(FILE);
 
 $file = "$Name.CB";
 open(FILE,">$file");
+printf FILE "time - KaiC-KaiB \n";
 for ($t=0;$t<$tt;$t++) {
-    printf FILE "%f %f\n",$T[$0][$t],$CBT[$t];
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$CBT[$t];
 }
 close(FILE);
 
 $file = "$Name.CAB";
 open(FILE,">$file");
+printf FILE "time - KaiC-KaiB-KaiA \n";
 for ($t=0;$t<$tt;$t++) {
-    printf FILE "%f %f\n",$T[$0][$t],$CABT[$t];
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$CABT[$t];
 }
+
+$file = "$Name.CT";
+open(FILE,">$file");
+printf FILE "time - Total KaiC \n";
+for ($t=0;$t<$tt;$t++) {
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$CT[$t];
+}
+
 close(FILE);
 
 
