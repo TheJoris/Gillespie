@@ -279,8 +279,8 @@ void update_propensity_functions( int *ids, int len )
     // remember: maximum number of reactants is two by definition!
     if( 0 == r->Nreact ) 
     {
-      // production without reactants
-      a[ids[i]] = r->k; // * sys.volume;
+      // production without reactants (Volume dependent!)
+      a[ids[i]] = r->k * sys.volume;
 
     }
     else if( 1 == r->Nreact ) 
@@ -431,8 +431,12 @@ void growth_init()
   }
   else if( GROWTH_EXPONENTIAL == sys.growth_type )
   {
+    /*
+      The inition volume is set to Ln(2), such that the average volume over a period
+      <V(t)> is equal to 1.    
+    */
     growth_const = LOG2 / doubling_time;
-    volume_min = 1.0;
+    volume_min = LOG2;
     
     growth_dt = .001 * doubling_time;
   }
@@ -550,7 +554,7 @@ void growth_dependent_reactions()
 	
 	for( i=0; i<sys.Nreact; ++i )
 	{
-		if( 2 == R[i].Nreact || R[i].HillComp >= 0)
+		if( 2 == R[i].Nreact || R[i].HillComp >= 0 || 0 == R[i].Nreact )
 		{
 			gdr[j] = i ;
 			j++ ;

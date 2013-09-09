@@ -256,8 +256,6 @@ sub add_reaction
   local ( $reacts, $prods, $kval, $component, $id, $nreacts, $nprods );
   ( $reacts, $prods, $kval, $time, $sigma ) = ( $_[0], $_[1], $_[2], $_[3], $_[4] );
 
-  # check kval for special identifiers
-
   if ($kval =~ /Hill\((.*)\)/)
   {
     # found Hill function type ==> extract values
@@ -271,7 +269,7 @@ sub add_reaction
   else # no special identifier ==> strip
   {
     ( $HillComp, $HillConst, $HillCoeff, $CanDuplicate ) = (0,0,0,0);
-    $kstr = sprintf( "%f", $kval ); #TODO: change such that arithmic expression is conv. to number.
+    $kstr = sprintf( "%f", $kval );
   }
 
   if( $time == 0 && $sigma == 0)
@@ -439,7 +437,7 @@ sub parseline
         printf STDERR "Setting # of duplication events per cell cycle to %i\n", $init_gene_copynbr;
       }
     }
-    elsif ($back =~ /vol/)
+    elsif ($back =~ /volume/)
     {
       $volume = $front;
       $volume =~ s/\s//g;

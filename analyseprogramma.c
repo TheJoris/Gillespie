@@ -23,81 +23,65 @@ void determine_peak();
 void determine_first_peak();	
 void determine_next_peak();
 void print_output();
+void filter_peaks(double delta);
+void moving_average(int avr_len);
 double get_kappa(double t_peak, int &i);
 			
 
 int input_type;
-int calc_force;
+int avr_len;
+
 char *inputfile;
 char *duplicationfile;
+
 double Td;					//doubling time
 double threshold;   //threshold for proteine production in hill function.
 double Tk;					//estimate of the clock time  --always around 25h, right?
-double first_div;	//time of first division --has to be entered
-double num_bins;		//number of bins of the histograms --set equal to T of the 1st period for the time being 
+double first_div;	  //time of first division --has to be entered
 
 double upper;			  //bounds for the search window for the next peak
 double lower;
 double dup;					//bounds for reporting warnings about possibly false peaks
 double dlow;
-
+double filter_interval;
 
 double *x;					//array of data
-double *p;					//array of peaks times
-double *ph;				//array of peak heights
+double *movavr_x;		//array of data, using a moving average of avr_len
+double *p;					//array of tentative peak times
+double *ph;				  //array of tentative peak heights
 double *l;					//array of period lengths 
-int   *T;					//histogram of period lengths
-double *patp;			//array of phases at peaks   
-int   *H;					//histogram of peak phases
-						//array of length num_bins
-						//at output this has to be converted to phases
-
 double *duplication_times;	//array of duplication_times.
 		
 double mean_ph ;					//mean peak height
-double mean_patp ;				//mean phase at peak --which I assume to equal the perfectly locked state if the run is long enough
-						
 
-double time_init ;
-double time_end ;
-double time_step ;
-int array_mem ;
-int array_id ;	
+double time_init;
+double time_end;
+double time_step;
+int array_mem;
+int array_id;	
 
-int prev_peak ;					//id of the previous peak
-int d_count ;
-int p_count ; 
-int delta ;					//number of steps between peaks -- 				
-						//this number is used to increase the efficiency of the algorithm by 
-						//'guessing' the position of the next peak once one is found
-
-
-//Warning: beware of first peaks right at the start of the run, it's hard for the algorithm to determine these
+int prev_peak;			//id of the previous peak
+int maxima_cntr;		// Counter for the number of period maxima.
+int p_count; 				// peak counter.
+int p_count_max;		//maximum number of peaks.	
 
 int main(int argc, char *argv[])
 {
-
-	//int j ;
-
-	d_count = 0 ;
 	p_count = 0 ;
 	mean_ph = 0. ;
-	mean_patp = 0. ;
 	array_id = 0 ;
+	avr_len = 10;
 	Td = 0 ;
 	Tk = 27. ;
 	threshold = 1.;
 	upper = 1.25 ;
 	lower = 0.75 ;
-	num_bins = Tk ;	
 	time_step = 0 ;
 	time_init = 0 ;
 	time_end = 0 ;
 	first_div = 0 ;
 	inputfile = NULL ;
 	input_type = PHOSP ;
-	calc_force = NO ;
-
 
 	int gt;
 
@@ -106,6 +90,8 @@ int main(int argc, char *argv[])
 	static const struct option long_options[] = {
    	{ "duplicationfile", required_argument, NULL, 'b' },
   	{ "threshold", required_argument, NULL, 'a' },
+  	{ "average length", required_argument, NULL, 'c' },
+  	{ "filter interval", required_argument, NULL, 'e' },
 		{ "doubling time", required_argument, NULL, 'd' },
 		{ "upper boundary", required_argument, NULL, 'u' },
 		{ "lower boundary", required_argument, NULL, 'l' },
@@ -121,10 +107,38 @@ int main(int argc, char *argv[])
 	while(gt != -1)
 	{
 	
-	  gt = getopt_long(argc, argv, "a:b:d:f:i:k:tpu:l:s:r", long_options, &option_index);
+	  gt = getopt_long(argc, argv, "a:b:c:d:e:f:i:k:tpu:l:s:r", long_options, &option_index);
 
 		switch(gt)
 		{
+			case 'c' :	if( NULL == optarg )
+						{
+							printf("An argument is required for the moving average +/-length\n" );
+							abort() ;
+						}
+						
+						if( 1 != sscanf( optarg, "%d%*s", &avr_len ) )		
+						{
+							printf("warning: no moving average length given\n");
+							return EXIT_FAILURE;
+						}
+						printf("moving average length is %d \n", avr_len);
+						break ;
+
+			case 'e' :	if( NULL == optarg )
+						{
+							printf("An argument is required for the filter interval\n" );
+							abort() ;
+						}
+						
+						if( 1 != sscanf( optarg, "%lf%*s", &filter_interval ) )		
+						{
+							printf("warning: no filter interval given\n");
+							return EXIT_FAILURE;
+						}
+						printf("Filter interval is %f \n", filter_interval);
+						break ;
+
 		  case 'a' :	if( NULL == optarg )
 						{
 							printf("An argument is required for the threshold\n" );
@@ -157,7 +171,7 @@ int main(int argc, char *argv[])
 						}
 						inputfile = (char*) malloc( ( strlen(optarg) + 1 ) * sizeof( char ) );
 						strcpy( inputfile, optarg );
-						printf( "proteine files %s\n", inputfile );
+						printf( "proteine number timetrace file %s\n", inputfile );
 						break ;
 						
 			case 'd':	if( NULL == optarg )				
@@ -243,16 +257,7 @@ int main(int argc, char *argv[])
 						}
 						printf("time_step is %f \n", time_step);
 						break ;
-
-      			case 't':	input_type = TOTAL;
-					break;
-
-      			case 'p':	input_type = PHOSP;
-					break;
-
-      			case 'r':	calc_force = YES;
-					break;
-			
+		
 			case -1 : break;
 			    
 			default  :	printf("no valid choice for switch \n") ;
@@ -262,106 +267,113 @@ int main(int argc, char *argv[])
 	
 	mem_alloc();
 
+	printf("Reading from input file: %s...\n",inputfile);
 	read_input();
 
-  //(Too) Very important parameter for peak searching!
-	delta = (int) (Tk / time_step) ;
-	printf("delta is %d \n", delta);	
+  //Setting parameters.
+	p_count_max = (int) (10 * (time_end - time_init) / Tk);
+	printf("Max. expected # of peaks: %d \n", p_count_max) ;
 
 	mem_alloc2();
 
-  prev_peak = 0;
-	determine_peak();
+	//Calculate the moving average of signal, and use this to find peaks.
+	moving_average(avr_len);
+
+	p_count=-1;
+  prev_peak = 2;
+	printf("Starting peak search within (%f,%f).\n",time_init,time_end-Tk);
 	do
 	{
 		p_count++;
 		determine_peak();
-	}
-	while( p[p_count] < (time_end-Tk) );
-			
-  printf("Number of peaks found: %d\n",p_count);
 
-	mean_patp = mean_patp / (p_count + 1 ) ;
+		if(p_count >= p_count_max)
+		{
+			printf("Max. # of allowed peaks reached.\n");
+			break;
+		}
+	} while( p[p_count] < (time_end-Tk) );
+  printf("Number of tentative peaks found: %d\n", p_count + 1 );
 
-	print_output() ;
+	//Only keep the highest peaks within the interval [Delta/2,Delta/2].
+	filter_peaks( filter_interval * Tk );
+  printf("Number of period maxima found: %d\n", maxima_cntr );
 
-	free(x) ;
-	free(p) ;
-	free(ph) ;
-	free(T) ;
-	free(H) ;
-	free(l) ;
-	free(patp) ;
+	printf("Printing output to file...");
+	print_output();
+	printf("done.\n");
 
+	free(x);
+	free(p);
+	free(ph);
+	free(l);
+	free(duplication_times);
+	//free(movavr_x); Freeing this causes havoc.
 	return 0;
 }
 
 
 void mem_alloc()
 {
-	int i ;
+	int i;
 	x = (double*) malloc( BLOCK * sizeof(double) );
+	movavr_x = (double*) malloc( BLOCK * sizeof(double) );
 
 	array_mem = BLOCK;
 
 	for(i=0; i<array_mem; i++)     
 	{
 		x[i] = 0.;
+		movavr_x[i] = 0.;
   }
   
 	return;
 }
 
 
-void mem_alloc2()
-{
-	int i,
-      num_cycl, 
-      num_dupl;   
-
-	num_cycl = (int) (2 * (time_end - time_init) / Tk) ;
-
-	printf("estimated number of proteine cycles: %d \n", num_cycl/2) ;
-
-	p = (double*) malloc( num_cycl * sizeof(double) );
-	ph = (double*) malloc( num_cycl * sizeof(double) );
-	l = (double*) malloc( num_cycl * sizeof(double) );
-	patp = (double*) malloc( num_cycl * sizeof(double) );
-	
-	for( i=0; i<num_cycl; i++ )    
-	{
-   	p[i] = 0.;
-		ph[i] = 0.;
-		l[i] = 0.;
-		patp[i] = 0.;
-  }
-
-	return;
-}
-
-
 void mem_realloc()
 {
-	int i ;
+	int i;
 
   // allocate memory for the data structure
 	array_mem += BLOCK;
 	x = (double*) realloc( x, array_mem * sizeof(double) );
+	movavr_x = (double*) realloc( x, array_mem * sizeof(double) );
 
   // initialize values
 	for( i=array_mem-BLOCK; i<array_mem; i++)
 	{
     x[i] = 0.;
+    movavr_x[i] = 0.;
  	}
  	
 	return ;
 }
 
 
+void mem_alloc2()
+{
+	int i;
+
+	p  = (double*) malloc( p_count_max * sizeof(double) );
+	ph = (double*) malloc( p_count_max * sizeof(double) );
+	l  = (double*) malloc( p_count_max * sizeof(double) );
+	
+	for( i=0; i<p_count_max; i++ )    
+	{
+   	p[i] = 0.;
+		ph[i] = 0.;
+		l[i] = 0.;
+  }
+
+	return;
+}
+
+
 void read_input()										
 {
 	double dummy;
-	int dummy2,cellcycle_nbr;
+	int dummy2,cellcycle_nbr,i,j;
 
 	FILE *fp;
 
@@ -369,17 +381,8 @@ void read_input()
 
 	if( (fp = fopen(inputfile,"r")) == NULL )
 	{
-		printf("cannot open inputfile \n");
+		printf("cannot open inputfile: %s \n",inputfile);
 		abort();
-	}
-
-	if(input_type == TOTAL)
-	{
-		fscanf( fp, "#time		Total KaiC	step \n");
-	}
-	else if(input_type == PHOSP)
-	{
-		fscanf( fp, "#time		Phos. Ratio	step \n");
 	}
 	
 	char *mufassa;
@@ -396,8 +399,6 @@ void read_input()
 	fscanf( fp, "%le\t%le\t%d\n", &dummy, &x[array_id], &dummy2 );
 	array_id++;
 	
-	//printf("2### %f - %d - %f\n",dummy,array_id,x[array_id-1]);
-
 	time_step = dummy - time_init;
 
 	printf("time_init is %f \n", time_init);
@@ -419,7 +420,7 @@ void read_input()
   
   if(Td > 0)
   {
-	  cellcycle_nbr = (time_end - time_init) / Td + 1;
+	  cellcycle_nbr = (int) (time_end - time_init) / Td + 1;
 	  printf("Time_end is %f, with %d data points. Est. cell cycle#: %d\n", time_end, array_id,     cellcycle_nbr-1);  
 
     //Process duplication times.
@@ -434,15 +435,15 @@ void read_input()
     //ignore first line.
 	  fscanf( fp, "%s%*s\n", mufassa );
 
-    array_id = 0;
-    while (!feof(fp) && array_id <BREAK)   
+    j = 0;
+    while (!feof(fp) && j <BREAK)   
 	  {
-	    fscanf( fp, "%le\t%d\n", &duplication_times[array_id], &dummy2);
+	    fscanf( fp, "%le\t%d\n", &duplication_times[j], &dummy2);
 	 	  //printf("Id %d, dup. time: %f\n", array_id, duplication_times[array_id]);
-		  array_id++;
+		  j++;
 	  }
 	
-	  printf("Read %d gene number modifications events.\n", array_id);
+	  printf("Read %d gene number modifications events.\n", j);
 
 	  fclose(fp); 
 	}
@@ -454,57 +455,114 @@ void read_input()
 }
 
 
+void moving_average(int avr_len)
+{
+	double avr_x;
+	int i, j, iend, istart;
+
+	printf("Moving average; %d data points, averaging length %d...",array_id,2*avr_len);
+	
+	for(i = avr_len; i < array_id - avr_len; i++)
+	{
+		istart = i - avr_len;
+  	iend   = i + avr_len;
+		avr_x = 0;
+  	for(j = istart; j < iend; j++)
+		{
+			avr_x += x[j];
+		}
+
+		movavr_x[i - avr_len] = avr_x/(2*avr_len);
+	}
+
+	printf(" done\n");
+
+	return;
+}
+
+
 void determine_peak()
 {
 	double dx1,dx2;
-	int i, iend, istart;
+	int i;
 
-  if(p_count == 0)
-    istart = 0;
-  else
-  	istart = (int) prev_peak + lower*delta;
-  	
-	iend   = (int) prev_peak + upper*delta;
-	
-	for( i = istart; i<= iend; i++ )
+	for( i = prev_peak + 1; i < array_id - 2 * avr_len; i++ )
 	{
-    dx1 = x[i]-x[i-1];
-    dx2 = x[i+1]-x[i];
+    dx1 = movavr_x[i]-movavr_x[i-1];
+    dx2 = movavr_x[i+1]-movavr_x[i];
     
-    //When sign change in derivatives: peak or valley.
-    if(dx1 * dx2 < 0 && dx1 > dx2)
-    {
-       break;
-    }
+    //When sign change in derivatives, change is at top and above threshold.
+    if( dx1 * dx2 <= 0 && dx1 > dx2 && movavr_x[i] > threshold)
+	  	break;
 	}
 	
-	//extra check if this is indeed a peak and not a annomaly due to noise.
-	dx1 = x[i-1]-x[i-2];
-  dx2 = x[i+2]-x[i+1];
-	if( (dx1 < 0 || dx2 > 0) && x[i] > threshold )
-	{
-	  printf("WARNING: noisy peak. Around i: %f - %f - %f \n",x[i-1],x[i],x[i+1]);
-	  printf("WARNING: i - 1, i + 1. %f - %f // %f - %f \n",x[i-2],x[i-1],x[i+1],x[i+2]);
-	}
-	else
-	{
-  	p[p_count] = time_init + i * time_step;				
-    ph[p_count] = x[i];
-    mean_ph += x[i];
-  
-    if(p_count > 0)
-      l[(p_count-1)] = p[p_count] - p[(p_count - 1)];	
-	
-	  prev_peak = i;
-	
-	  //printf("%d - %d - %d --- %dth peak at t = %f \n",istart,iend,i, p_count, p[p_count]) ;		
+	p[p_count] = time_init + (i + avr_len) * time_step;				
+  ph[p_count] = movavr_x[i];
 
-	  if(i == istart || i == iend)  
-	  {
-	  	printf("WARNING: peak at search boundary. %d at %f\n", p_count, p[p_count]);
-	  }
+  if(p_count > 0)
+    l[(p_count-1)] = p[p_count] - p[(p_count - 1)];	
+		
+	//printf("%d - %d - %d --- %dth peak at t = %f \n",istart,iend,i, p_count, p[p_count]) ;		
   
-  }
+  prev_peak = i;
+
+	return;
+}
+
+
+void filter_peaks(double delta)
+{
+	int i,j,local_max_i;
+	double local_max;
+
+	//printf("Filtering out non-maxima peaks...");
+	
+	maxima_cntr=0;
+	for(i = 0; i < p_count-1; i++)
+	{
+		//Find te first peak that is seperated within
+		// a distance delta from the next.
+		//printf("%f - %f\n",l[i],delta);
+
+		local_max	= ph[i];
+		local_max_i = i;
+		if(l[i] < delta)
+		{
+			j = i;		
+			do {
+				j++;
+				if(ph[j] > local_max)
+				{
+					local_max = ph[j];
+					local_max_i = j;
+				}
+			} while(l[j] < delta && j < p_count - 1);
+
+			i = j;
+		}
+
+		p[maxima_cntr] = p[local_max_i];
+		ph[maxima_cntr] = local_max;
+		if(maxima_cntr > 0)
+	    l[(maxima_cntr-1)] = p[maxima_cntr] - p[(maxima_cntr - 1)];	
+
+  	maxima_cntr++;
+	}
+
+	//For the last tent. maximum, since it has no next peak to ther right,
+  //we assume it is maximum if it is more than a distance delta away 
+	//from the left peak.
+	if(l[p_count - 1] > delta || ph[p_count] > local_max)
+	{
+		local_max = ph[i];
+
+		p[maxima_cntr] = p[i];
+		ph[maxima_cntr] = local_max;
+		if(maxima_cntr > 0)
+	    l[(maxima_cntr-1)] = p[maxima_cntr] - p[(maxima_cntr - 1)];	
+
+  	maxima_cntr++;
+	}
 
 	return;
 }
@@ -526,36 +584,54 @@ double get_kappa(double t_peak, int &i){
 void print_output()
 {
 	int i,j;
-	double phase;
-	double time;
 
-	FILE** fp = (FILE**) malloc(sizeof(FILE*) * 2);
+	FILE *fp;
 
-	if( (fp[0] = fopen("oscillations.dat","w")) == NULL )
+	if( (fp = fopen("oscillations.dat","w")) == NULL )
 	{
 		printf("cannot open outputfile \n");
 		abort();
 	}
 
-	mean_ph = mean_ph / (p_count + 1 );						
-	fprintf(fp[0], "#number of peaks is %d \n", p_count);
-	fprintf(fp[0], "#mean height of peaks is %f \n", mean_ph); 
+	mean_ph=0;
+	for(i=0;i<maxima_cntr;i++)
+	{
+		mean_ph += ph[i];
+	}
+	mean_ph /= maxima_cntr;
+							
+	fprintf(fp, "#number of peaks is %d \n", maxima_cntr);
+	fprintf(fp, "#mean height of peaks is %f \n", mean_ph); 
 
-  j=0;
+  i=0,j=0;
   if(Td > 0){
-  	fprintf(fp[0], "#time_peak - period from this peak - height peak - kappa \n"); 	
-  	for(i=0; i<p_count; i++)    
-     	fprintf( fp[0], "%f\t%f\t%f\t%f \n", p[i], l[i], ph[i], get_kappa(p[i],j) ); 
+  	fprintf(fp, "#time_peak - period from this peak - height peak - kappa \n"); 	
+  	for(i=0; i<maxima_cntr; i++)    
+     	fprintf( fp, "%f\t%f\t%f\t%f \n", p[i], l[i], ph[i], get_kappa(p[i],j) ); 
      	
   }
   else
   {
-  	fprintf(fp[0], "#time_peak - period from this peak - height peak \n"); 	
-    for(i=0; i<p_count; i++)    
-     	fprintf( fp[0], "%f\t%f\t%f\n", p[i], l[i], ph[i] ); 
+  	fprintf(fp, "#time_peak - period from this peak - height peak \n"); 	
+    for(i=0; i<maxima_cntr; i++)    
+     	fprintf( fp, "%f\t%f\t%f\n", p[i], l[i], ph[i] ); 
   }
 
-	fclose(fp[0]);
+	fclose(fp);
+
+  //Write data of moving average of timetrace.
+	if( (fp = fopen("moving_average.dat","w")) == NULL )
+	{
+		printf("cannot open file to write moving average. \n");
+		abort();
+	}
+
+ 	fprintf(fp, "time - proteine concentration \n"); 	
+  for(i = 0; i < array_id - 2 * avr_len; i++)    
+    fprintf( fp, "%f\t%f\n", (avr_len + i)*time_step, movavr_x[i] ); 
+    
+	fclose(fp);
 
 	return;
 }
+

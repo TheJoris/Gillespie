@@ -61,10 +61,10 @@ do
   cp $INPUT_FILE $RUN_DIR/$RUN_MDL
 
   #cp ../gplot_KondoPNG.cfg ./$RUN_DIR
-  cp ./gplot_totST.cfg ./$RUN_DIR
-  cp ./gplot_KaiA.cfg ./$RUN_DIR
-  cp ./gplot_KaiB.cfg ./$RUN_DIR
-  cp ./gplot_KaiA2.cfg ./$RUN_DIR
+  #cp ./gplot_totST.cfg ./$RUN_DIR
+  #cp ./gplot_KaiA.cfg ./$RUN_DIR
+  #cp ./gplot_KaiB.cfg ./$RUN_DIR
+  #cp ./gplot_KaiA2.cfg ./$RUN_DIR
      
   for paramfile in $paramfiles
   do
@@ -73,9 +73,28 @@ do
     sed -i 's/\['$paramfile'\]/'$PARAM'/' ./$RUN_DIR/$RUN_MDL
 
   done
-
+  
   cd $RUN_DIR
+  
+  #Subsitute all arithmitic with numenbrical expressions
+  Gillespie_finalizemdl $RUN_DIR
+  mv out.temp RUN_MDL
+  
+  # Retrieve arithmic expressions from mdl file and calc. the awnser. 
+  #TOFIND=`grep -o -m 1 '\[.*\]' $RUN_MDL`
+  #while [ -n "$TOFIND" ]; do
+  #  RESULT1=`grep -o -m 1 '\[.*\]' $RUN_MDL | sed -e 's/\[\(.*\)\]/\1/'`
+  #  RESULT2=`echo "$RESULT1" | bc`
 
+    #Change to regex.
+  #  TOFIND2=`printf '%q' "$TOFIND"`
+
+    # Replace the [] exressions from model file with the result.  
+  #  sed -i 's/'"$TOFIND2"'/'$RESULT2'/' $RUN_MDL
+  #  TOFIND=`grep -o -m 1 '\[.*\]' $RUN_MDL`
+  #done   
+  
+  #Generate files for simulator from model file, and run simulation.
   Gillespie_parse $RUN_MDL > Gillespie.inp
   Gillespie $RUN_MDL > $RUN_LOG
   
@@ -117,11 +136,11 @@ do
   #gnuplot gplot_KaiB.cfg
   
   ### ThreeState model
-  /home/paijmans/Gillespie/ThreeStateOscillator/data_3SO.scr
-  gnuplot gplot_totST.cfg
-  gnuplot gplot_KaiA.cfg
-  gnuplot gplot_KaiB.cfg
-  gnuplot gplot_KaiA2.cfg
+  #/home/paijmans/Gillespie/ThreeStateOscillator/data_3SO.scr
+  #gnuplot gplot_totST.cfg
+  #gnuplot gplot_KaiA.cfg
+  #gnuplot gplot_KaiB.cfg
+  #gnuplot gplot_KaiA2.cfg
   
   cd ..
   
@@ -134,5 +153,3 @@ do
   #rm -r $RUN_DIR
 
 done
-
-gnuplot gplot_Cp.cfg

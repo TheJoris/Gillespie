@@ -144,8 +144,16 @@ for ($t = 0; $t < $tt; $t++) {
         $Puw[$t] += $C[$p][$t];
     }
     print "$t: CT is $CT[$t] or $Ctest; AT is $AT[$t]; BT is $BT[$t]\n";
-    $Puw[$t] /= $CT[$t];
-    $Pw [$t] /= (6 * $CT[$t]);
+		if ($CT[$t] > 0){
+	    $Puw[$t] /= $CT[$t];
+  	  $Pw [$t] /= (6 * $CT[$t]);
+		}
+		else
+		{
+	    $Puw[$t] = 0;
+  	  $Pw [$t] = 0;
+		}
+
     if ($Pw[$t] < $Pwmin && $T[0][$t] > 50.) {
   	    $tmin = $t;
 	      $Pwmin = $Pw[$t];

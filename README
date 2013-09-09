@@ -49,7 +49,6 @@ Model files
 
 Prerequisites
 ========================
-
 1. C compiler (gcc)
 2. C standard libraries
 3. GNU make
