@@ -93,8 +93,7 @@ typedef struct sys_type
           doubling_time, ///< Doubling time of the bacterium
           doubling_time_std, ///< Standard deviation of the doubling time
           last_division, ///< Time of the last division
-          duplication_phase, ///< Fraction of doubling_time where gene duplication happens [0,1).
-          duplication_phase_std, ///< Standard deviation of the duplication time.
+          duplication_period_std, ///< Standard deviation of the duplication time.
           tau,           ///< Current time
           tau_init,      ///< Time of previous runs, read from input-file
           dt;            ///< Time step of data write out

@@ -31,12 +31,16 @@ rm -f NAB.*
 
 # Define files for parameter parsing.
 MODEL_FILE=$PROJECT_NAME".mdl"
-INPUT_FILE=$MODEL_FILE
 PARAM_FILE=$PROJECT_NAME".par"
 TEMPL_FILE=$PROJECT_NAME".mtp"
 OUTPUT_FILE=`pwd`"/"$PROJECT_NAME".dat"
 
-Gillespie_parasub $PARAM_FILE $TEMPL_FILE $MODEL_FILE
+if [ -a $PARAM_FILE ] 
+then
+  Gillespie_parasub $PARAM_FILE $TEMPL_FILE $MODEL_FILE
+else
+  cp $TEMPL_FILE $MODEL_FILE
+fi
 
 #Find the number of PARAM files.
 PARAM_NBR=`ls -1 PARAM* | wc -l`
@@ -50,22 +54,16 @@ echo $ITERATION_NBR "simulations on roll with" $PARAM_NBR "parameters, writing d
 for i in `seq 1 $ITERATION_NBR`
 do
 
-  #start counting at 10, easier dir sequence.
-  j=`expr $i + 10`
+  #start counting at 100, easier dir sequence.
+  j=`expr $i + 100`
 
   RUN_DIR=$PROJECT_NAME"_"$j
   RUN_MDL=$PROJECT_NAME"_"$j".mdl"
   RUN_LOG=$PROJECT_NAME"_"$j".log"
 
   mkdir $RUN_DIR
-  cp $INPUT_FILE $RUN_DIR/$RUN_MDL
-
-  #cp ../gplot_KondoPNG.cfg ./$RUN_DIR
-  #cp ./gplot_totST.cfg ./$RUN_DIR
-  #cp ./gplot_KaiA.cfg ./$RUN_DIR
-  #cp ./gplot_KaiB.cfg ./$RUN_DIR
-  #cp ./gplot_KaiA2.cfg ./$RUN_DIR
-     
+  cp $MODEL_FILE $RUN_DIR/$RUN_MDL
+   
   for paramfile in $paramfiles
   do
   
@@ -78,77 +76,43 @@ do
   
   #Subsitute all arithmitic with numenbrical expressions
   Gillespie_finalizemdl $RUN_DIR
-  mv out.temp RUN_MDL
-  
-  # Retrieve arithmic expressions from mdl file and calc. the awnser. 
-  #TOFIND=`grep -o -m 1 '\[.*\]' $RUN_MDL`
-  #while [ -n "$TOFIND" ]; do
-  #  RESULT1=`grep -o -m 1 '\[.*\]' $RUN_MDL | sed -e 's/\[\(.*\)\]/\1/'`
-  #  RESULT2=`echo "$RESULT1" | bc`
-
-    #Change to regex.
-  #  TOFIND2=`printf '%q' "$TOFIND"`
-
-    # Replace the [] exressions from model file with the result.  
-  #  sed -i 's/'"$TOFIND2"'/'$RESULT2'/' $RUN_MDL
-  #  TOFIND=`grep -o -m 1 '\[.*\]' $RUN_MDL`
-  #done   
-  
+  mv out.temp $RUN_MDL
+   
   #Generate files for simulator from model file, and run simulation.
   Gillespie_parse $RUN_MDL > Gillespie.inp
-  Gillespie $RUN_MDL > $RUN_LOG
-  
-  ### Kondo model
-  #ls kaiKondo.0.*Cp* | Gillespie_add avr.Cp
-  #ls kaiKondo.0.lCp* | Gillespie_add avr.lCp
-  #ls kaiKondo.0.*lATP | Gillespie_add avr.lATP
-  #ls kaiKondo.0.*ADP | Gillespie_add avr.ADP
-  #ls kaiKondo.0.lPi | Gillespie_add avr.lPi
-  #ls kaiKondo.0.*ATP | Gillespie_add avr.ATP
-  
-  #Gillespie_diff avr.ADP diff.ADP
-  #Gillespie_diff avr.ATP diff.ATP
-  #Gillespie_diff avr.Cp diff.Cp
-  #Gillespie_diff avr.lCp diff.lCp
-  #Gillespie_diff avr.lATP diff.lATP
-  #Gillespie_diff avr.lPi diff.lPi
-  
-  ### Rust model
-  #data_Rust
+  #Gillespie -qtp $RUN_MDL > $RUN_LOG
+  seed=`date +%N`
+  Gillespie -s $seed $RUN_MDL > $RUN_LOG
 
-  ### Jeroen model
-  #Gillespie_ana $PROJECT_NAME
+  #ls $PROJECT_NAME'.0.C'* | Gillespie_add Ctot.dat
+
+  #ls $PROJECT_NAME'.0.C1'*  | Gillespie_add tempC1.dat
+  #ls $PROJECT_NAME'.0.C2'* $PROJECT_NAME'.0.C2'* | Gillespie_add tempC2.dat
+  #ls $PROJECT_NAME'.0.C3'* $PROJECT_NAME'.0.C3'* $PROJECT_NAME'.0.C3'* | Gillespie_add tempC3.dat
+  #ls $PROJECT_NAME'.0.C4'* $PROJECT_NAME'.0.C4'* $PROJECT_NAME'.0.C4'* $PROJECT_NAME'.0.C4'* | Gillespie_add tempC4.dat
+  #ls $PROJECT_NAME'.0.C5'* $PROJECT_NAME'.0.C5'* $PROJECT_NAME'.0.C5'* $PROJECT_NAME'.0.C5'* $PROJECT_NAME'.0.C5'* | Gillespie_add tempC5.dat
+  #ls $PROJECT_NAME'.0.C6'* $PROJECT_NAME'.0.C6'* $PROJECT_NAME'.0.C6'* $PROJECT_NAME'.0.C6'* $PROJECT_NAME'.0.C6'* $PROJECT_NAME'.0.C6'* | Gillespie_add tempC6.dat
+
+  #ls tempC1.dat tempC2.dat tempC3.dat tempC4.dat tempC5.dat tempC6.dat | Gillespie_add Cpho.dat
+
+  #pr -mts' ' Ctot.dat Cpho.dat > tempCcomb.dat
+
+  #awk 'NR>10 { tmp=($4)/(6 * $2) ; printf"%0.8f\t%0.8f\n", $1, tmp}' tempCcomb.dat > tempCpho.dat
+  #mv tempCpho.dat Cpho.dat
+
+  # Remove all files for disk space.
+  #rm -f tempC*
+  #rm -f $PROJECT_NAME'.0.'*
   
-  ### KaiNew model
-  #ls KaiANew.0.AU KaiANew.0.U | Gillespie_add U.tot
-  #ls KaiANew.0.AT KaiANew.0.T | Gillespie_add T.tot
-  #ls KaiANew.0.AS KaiANew.0.S | Gillespie_add S.tot
-  #ls KaiANew.0.AD KaiANew.0.D | Gillespie_add D.tot
-  #ls T.tot S.tot D.tot | Gillespie_add Cp.tot
-  
-  ### Kai2state model
-  #/home/paijmans/Gillespie/Kai2Rust/data_2KaiAB.scr
-  
-  #Gillespie_average $INPUT_FILE $OUTPUT_FILE
-  
-  #gnuplot gplot_totST.cfg
-  #gnuplot gplot_KaiA.cfg
-  #gnuplot gplot_KaiB.cfg
-  
-  ### ThreeState model
-  #/home/paijmans/Gillespie/ThreeStateOscillator/data_3SO.scr
-  #gnuplot gplot_totST.cfg
-  #gnuplot gplot_KaiA.cfg
-  #gnuplot gplot_KaiB.cfg
-  #gnuplot gplot_KaiA2.cfg
-  
+  #Gillespie_kaiana $PROJECT_NAME
+    
   cd ..
   
-  for paramfile in $paramfiles 
-  do
-    PARAM=`gawk -v lnbr="$i" 'NR==lnbr {print $1}' $paramfile`
-    sed -i '$ s/^/'$PARAM' /' $OUTPUT_FILE
-  done
+  #for paramfile in $paramfiles 
+  #do
+  #  PARAM=`gawk -v lnbr="$i" 'NR==lnbr {print $1}' $paramfile`
+  #  sed -i '$ s/^/'$PARAM' /' $OUTPUT_FILE
+  #done
   
   #rm -r $RUN_DIR
 

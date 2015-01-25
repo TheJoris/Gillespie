@@ -33,11 +33,11 @@ Eventpair duplications;  ///< Store all duplication events.
 
 /*------------------------Locally defined functions--------------------------*/ 
 
-int start();
+int  start();
 void allocate_memory();
 void print_reactions( boolean show_count );
 void print_initial_conditions();
-int finish();
+int  finish();
 void get_reaction_network();
 void show_help();
 
@@ -56,8 +56,7 @@ int main(int argc, char *argv[])
   sys.volume = 1.;              // initial volume factor
   sys.doubling_time = -1;       // no growth at all
   sys.doubling_time_std = 0;    // the doubling time is exact
-  sys.duplication_phase = .0; // Phase of cell cycle when genome doubles.
-  sys.duplication_phase_std = 0.; // Std deviation in gene doubling.
+  sys.duplication_period_std = 0.; // Std deviation in gene doubling.
   sys.init_gene_copynbr = 1; // Number of gene doublings before doubling whole genome.
   sys.last_division = NAN;      // to distinguish from given division times
   sys.growth_type = GROWTH_EXPONENTIAL;
@@ -221,7 +220,7 @@ int start()
   fscanf( fp, "%lg%*s", &sys.dt );
   fscanf( fp, "%lg\t%lg%*s", &tau_equi, &tau_prod );
   fscanf( fp, "%lg\t%lg%*s", &sys.doubling_time, &sys.doubling_time_std );
-  fscanf( fp, "%lg\t%lg\t%d%*s", &sys.duplication_phase, &sys.duplication_phase_std, &sys.init_gene_copynbr );
+  fscanf( fp, "%lg\t%d%*s", &sys.duplication_period_std, &sys.init_gene_copynbr );
   
   // convert the number of blocks, which the calculation should run, into steps
   // or set it to the maximum number, when it should be neglected
@@ -259,12 +258,12 @@ int start()
   printf("Number of production  blocks      %8d\n",*n_blk_run);
   printf("Number of steps per block         %8d\n",*n_steps);*/
   printf("Timesteps of writeout             %8f\n",sys.dt);
-  printf("Total time(steps) of equilibrium run     %8f (%ld)\n",tau_equi,steps_equi);
-  printf("Total time(steps) of production run      %8f (%ld)\n",tau_prod,steps_prod);
+  printf("Total time(steps) of equilibrium run     %8f\n",tau_equi);
+  printf("Total time(steps) of production run      %8f\n",tau_prod);
   if( HAS_GROWTH )
   {
     printf( "Doubling time                     %8f +- %8f\n", sys.doubling_time, sys.doubling_time_std );
-    printf( "Duplication phase                  %8f +- %8f, Number of gene duplications: %d\n", sys.duplication_phase, sys.duplication_phase_std, sys.init_gene_copynbr );   
+    printf( "Duplication phase                  %8f +- %8f, Number of gene duplications: %d\n",  sys.doubling_time, sys.duplication_period_std, sys.init_gene_copynbr );   
   }
 
   // use this information to allocate memory and read in components and reactions
@@ -274,10 +273,10 @@ int start()
   get_reaction_network();
 
   //Set duplication events array.
-  duplications.len = (int) tau_prod / sys.doubling_time;
+  duplications.len = (int) 2 * (tau_prod + tau_equi)  / sys.doubling_time;
   duplications.cntr = 0;
-  duplications.time = malloc( 2 * duplications.len * sizeof( double ) );
-  duplications.number = malloc( 2 * duplications.len * sizeof( double ) );
+  duplications.time = malloc( (sys.init_gene_copynbr + 1) * duplications.len * sizeof( double ) );
+  duplications.number = malloc( (sys.init_gene_copynbr + 1) * duplications.len * sizeof( double ) );
   
   // check, if the state of the system has to be loaded from a file
   if( sys.input != NULL )
@@ -366,20 +365,10 @@ int start()
   
   printf( "===============================================================================\n" );
   
-  // run some steps to reach equilibrium 
-  if( tau_equi > 0 )
-  {
-    printf( "Start equilibrium run...\n" );
-    run( EQUIL, tau_equi, steps_equi );
-  }
-  
-  // do actual run
-  if( tau_prod > 0 )
-  {
-    printf( "Start production run...\n" );
-    run( RUN, tau_prod, steps_prod );
-  }
-  
+  // Fire up the Gillespie algorithm.
+  printf( "Start run...\n" );
+  run( tau_prod, tau_equi, steps_prod );
+ 
   return EXIT_SUCCESS;
 }
 

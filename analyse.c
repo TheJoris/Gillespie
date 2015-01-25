@@ -31,13 +31,13 @@ double adata_time=0.;    ///< the last time a data set has been written
 /**
   Initialize analyzation by allocating memory.
 */
-void analyse_init()
+void analyse_init( double tau_equi )
 {
   int i;
   
   // reset ID to ensure array is filled from the beginning onwards
   adata_id=0;
-  adata_time = sys.tau_init - sys.dt;
+  adata_time = sys.tau_init + tau_equi - sys.dt;
   
   // initial container for data
   adata_length = ANALYSIS_EXTEND;
@@ -145,14 +145,14 @@ void output_special( char *filename_total, char *filename_phos )
     fp_total = fopen( filename_total, "w" );
     fprintf( fp_total, "#time\t\t" );
     fprintf( fp_total, "Total KaiC\t" );
-    fprintf( fp_total, "step\n" );
+    fprintf( fp_total, "PtNbr\n" );
   }
   if( OUTPUT_PHOS )
   {
     fp_phos = fopen( filename_phos, "w" );
     fprintf( fp_phos, "#time\t\t" );
     fprintf( fp_phos, "Phos. Ratio\t" );
-    fprintf( fp_phos, "step\n" );
+    fprintf( fp_phos, "PtNbr\n" );
   }
   
   // iterate through all steps
@@ -182,12 +182,12 @@ void output_special( char *filename_total, char *filename_phos )
 //      if( sys.output_conc == OUTPUT_CONCENTRATION )
 //        total /= sys.volume;
       fprintf( fp_total, "%e\t", total );
-      fprintf( fp_total, "%lld\n", adata[j].ns );
+      fprintf( fp_total, "%e\n", total * adata[j].volume );
     }
     if( OUTPUT_PHOS )
     {
       fprintf( fp_phos, "%e\t", phos/total*norm );
-      fprintf( fp_phos, "%lld\n", adata[j].ns );
+      fprintf( fp_phos, "%e\n", phos/total*norm*adata[j].volume );
     }
   }
   
@@ -248,16 +248,16 @@ void analyse_finish( int run )
         fp = fopen( filename, "w" );
     
         // write header
-        fprintf( fp, "#time\t\t" );
+        fprintf( fp, "#time\t" );
         fprintf( fp, "%s\t", Xname[i] );
-        fprintf( fp, "step\n" );
+        fprintf( fp, "PtNbr\n" );
     
         // iterate through all steps
         for( j=0; j<adata_id; j++ ) 
         {
           fprintf( fp, "%e\t", adata[j].tau );
           fprintf( fp, "%e\t", adata[j].X[i] );
-          fprintf( fp, "%lld\n", adata[j].ns );
+          fprintf( fp, "%e\n", adata[j].X[i] * adata[j].volume );
         }
     
         // close file
@@ -266,7 +266,7 @@ void analyse_finish( int run )
     }
   }
 
-  // output queue if it has been used
+  /* output queue if it has been used
   if( sys.needs_queue )
   {
     // open file for writing the queue
@@ -287,11 +287,12 @@ void analyse_finish( int run )
     // close file
     fclose(fp);
   }
+*/
 
   // output volume if it has been changed
   if( HAS_GROWTH )
   {
-    // open file for writing the queue
+    /* open file for writing the queue 
     sprintf( filename, "%s.%d.volume", sys.name, run );
     fp = fopen( filename, "w" );
   
@@ -307,6 +308,7 @@ void analyse_finish( int run )
     
     // close file
     fclose(fp);
+    */
     
     // Same for gene copy number in cell cycle.
     // open file for writing the queue
@@ -316,7 +318,7 @@ void analyse_finish( int run )
     // write header
     fprintf(fp,"#time\tgene_copynbr\n");
     
-    printf("dup cntr/len: %d / %d\n",duplications.cntr,duplications.len);
+    printf("Writing file of gene duplications, cntr/cntr max: %d / %d\n",duplications.cntr,duplications.len);
   
     // iterate through all steps
     for( j=0; j<duplications.cntr; j++ ) 
@@ -327,5 +329,6 @@ void analyse_finish( int run )
     
     // close file
     fclose(fp);
+
   }
 }

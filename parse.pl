@@ -23,8 +23,7 @@ sub InitAll
   $volume = 1.0;
   $doubling_time = -1.; # no growth at all
   $doubling_time_std = 0; # exact doubling time
-  $duplication_phase = 0;
-  $duplication_phase_std = 0;
+  $duplication_period_std = 0;
   $init_gene_copynbr = 0;  
   $help = <<EOF;
 
@@ -274,11 +273,11 @@ sub add_reaction
 
   if( $time == 0 && $sigma == 0)
   {
-    printf STDERR "Adding reaction %s --> %s, k = %s\n", $_[0], $_[1], $kstr;
+    #printf STDERR "Adding reaction %s --> %s, k = %s\n", $_[0], $_[1], $kstr;
   }
   else
   {
-    printf STDERR "Adding reaction %s ==> %s, k = %s, T = %f, s = %f\n", $_[0], $_[1], $kstr, $_[3], $_[4];
+    #printf STDERR "Adding reaction %s ==> %s, k = %s, T = %f, s = %f\n", $_[0], $_[1], $kstr, $_[3], $_[4];
   }
 
 
@@ -386,6 +385,7 @@ sub add_degradation_reactions
   $degradation = $_[0];
 
   $ncomp = scalar(@name_list);
+
   for ($id=0; $id<$ncomp; $id++)
   {
     if( 0 == $comp_const[$id] )
@@ -418,17 +418,11 @@ sub parseline
     }
     elsif ($back =~ /duplication/)
     {
-      if ($back =~ /time/)
+      if ($back =~ /std/)
       {
-        $duplication_phase = $front;
-        $duplication_phase =~ s/\s//g;
-        printf STDERR "Setting gene duplication time to %f\n", $duplication_phase;
-      }
-      elsif ($back =~ /std/)
-      {
-        $duplication_phase_std = $front;
-        $duplication_phase_std =~ s/\s//g;
-        printf STDERR "Setting gene duplication time standard deviation to %f\n", $duplication_phase_std;
+        $duplication_period_std = $front;
+        $duplication_period_std =~ s/\s//g;
+        printf STDERR "Setting gene duplication time standard deviation to %f\n",         $duplication_period_std;
       }
       elsif ($back =~ /nbr/)
       {
@@ -703,7 +697,7 @@ sub WriteGillespieInp
   printf "%f\t\t\tTime_step\n",$time_step;
   printf "%f\t%f\t\tTotal_time\n\n",$total_time_equi,$total_time_run;
   printf "%f\t%f\t\tDoubling_time\n\n", $doubling_time, $doubling_time_std;
-  printf "%f\t%f\t%i\t\tDuplication_phase\n\n", $duplication_phase, $duplication_phase_std, $init_gene_copynbr;
+  printf "%f\t%i\t\tDuplication_std\n\n", $duplication_period_std, $init_gene_copynbr;
 }
 
 # This is where the action starts.

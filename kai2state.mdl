@@ -1,76 +1,52 @@
 # Four state kaiC model, with 2 nucleotide states: X-D,X-T.
-# Assuming phosphotrasfer from and to ATP/ADP only.
-# Only KaiA.
+# Assuming phosphotrasfer from and to ATP/ADP only and 
+# Phosphatase acitivity to enhance specifity for T-path VS S-path.
 
-Kai2state : code name
-0  : total eq
-50 : total prod
+KinReadRust : code name
+0    : total eq
+1E3  : total prod
 0.05 : time
 
 # ATP ADP Pi :components #Fixed chemical potentials
-U-ATP T-ATP D-ATP S-ATP : components
-U-ADP T-ADP D-ADP S-ADP : components
-
-AU-ATP AT-ATP AD-ATP AS-ATP : components
-AU-ADP AT-ADP AD-ADP AS-ADP : components
-
-A : components
-
-# ATP, lATP and ADP binding.
-# We know ADP/ATP affinity ~.96 for CII(unphos)
-# and ~.1 for CI. (CI-only)
-
+U-ATP T-ATP DT-ATP DS-ATP S-ATP : components
+U-ADP T-ADP DT-ADP DS-ADP S-ADP : components
 
 # Nucleotide exchange AND hydrolysis
+U-ATP <--> U-ADP           : k = 1 : k = 2
+T-ATP <--> T-ADP           : k = 1 : k = 2
+DT-ATP <--> DT-ADP         : k = 1 : k = 2
+DS-ATP <--> DS-ADP         : k = 1 : k = 2
+S-ATP <--> S-ADP           : k = 1 : k = 2
 
-(No kaiA)
-U-ATP <--> U-ADP           : k = 1.001 : k = 0.01
-T-ATP <--> T-ADP           : k = 1.001 : k = 0.01
-D-ATP <--> D-ADP           : k = 1.001 : k = 0.01
-S-ATP <--> S-ADP           : k = 1.001 : k = 0.01
+# Phosphotransfer reactions.
+U-ATP <--> T-ADP         : k = 2  : k = 1     
+T-ATP --> DT-ADP         : k = 2
+DT-ADP --> T-ATP         : k = 1
+DT-ADP --> S-ATP         : k = 0.5
+S-ATP --> DS-ADP         : k = 1
+DS-ADP --> T-ATP         : k = 1
+DS-ADP --> S-ATP         : k = 0.5
+U-ATP <--> S-ADP         : k = 1  : k = 0.5
 
-(with kaiA)
-AU-ATP <--> AU-ADP         : k = 1.1 : k = 1.0
-AT-ATP <--> AT-ADP         : k = 1.1 : k = 1.0
-AD-ATP <--> AD-ADP         : k = 1.1 : k = 1.0
-AS-ATP <--> AS-ADP         : k = 1.1 : k = 1.0
+# Phosphatase reactions
+T-ATP <--> U-ATP          : k = 0.  : k = 0.
+T-ADP <--> U-ADP          : k = 0.  : k = 0.
 
+DT-ATP <--> T-ATP          : k = 0.  : k = 0.
+DT-ADP <--> T-ADP          : k = 0.  : k = 0.
+DT-ATP <--> S-ATP          : k = 0.  : k = 0.
+DT-ADP <--> S-ADP          : k = 0.  : k = 0.
+DS-ATP <--> T-ATP          : k = 0.  : k = 0.
+DS-ADP <--> T-ADP          : k = 0.  : k = 0.
+DS-ATP <--> S-ATP          : k = 0.  : k = 0.
+DS-ADP <--> S-ADP          : k = 0.  : k = 0.
 
-# kaiA binding to kaiC-AA, Kd ~ Nanomolair; as observed in Johsnon, PNAS 2011 paper.
+S-ATP <--> U-ATP          : k = 0.  : k = 0.
+S-ADP <--> U-ADP          : k = 0.  : k = 0.
 
-A + U-ATP <--> AU-ATP  : k = 1E0 : k = 1.0
-A + T-ATP <--> AT-ATP  : k = 4E0 : k = 1.0
-A + D-ATP <--> AD-ATP  : k = 1.6E1 : k = 1.0
-A + S-ATP <--> AS-ATP  : k = 4E0  : k = 1.0
-
-A + U-ADP <--> AU-ADP  : k = 1E0 : k = 1.0
-A + T-ADP <--> AT-ADP  : k = 4E0 : k = 1.0
-A + D-ADP <--> AD-ADP  : k = 1.6E1 : k = 1.0
-A + S-ADP <--> AS-ADP  : k = 4E0  : k = 1.0
-
-
-# Phosphotransfer reactions. (noKaiA)
-
-U-ATP <--> T-ADP          : k = 1.0    : k = 2.0     
-T-ATP <--> D-ADP          : k = 0.005  : k = 0.01    
-D-ADP <--> S-ATP          : k = 2.0     : k = 1.0  
-S-ADP <--> U-ATP          : k = 0.15    : k = 0.075
-
-
-#Phosphotransfer reactions. (KaiA)
-
-AU-ATP <--> AT-ADP         : k = 2.0  : k = 1.0 
-AT-ATP <--> AD-ADP         : k = 2.0  : k = 1.0 
-AD-ADP <--> AS-ATP         : k = 0.5  : k = 1.0 
-AS-ADP <--> AU-ATP         : k = 0.05 : k = 0.1
-
+# EXIT reactions
+DT-ADP --> DTEND            : k = 1E6
+DS-ADP --> DSEND            : k = 1E6
 
 # Initial conditions
-
-U-ATP == 1890  : initial
-U-ADP == 210  : initial
-#T == 1500  : initial
-#D == 4000  : initial
-#S == 1500  : initial
-
-A == 1500 : initial
+U-ATP == 1E6  : initial

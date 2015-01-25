@@ -628,7 +628,7 @@ void print_output()
 
  	fprintf(fp, "time - proteine concentration \n"); 	
   for(i = 0; i < array_id - 2 * avr_len; i++)    
-    fprintf( fp, "%f\t%f\n", (avr_len + i)*time_step, movavr_x[i] ); 
+    fprintf( fp, "%f\t%f\n", time_init + (avr_len + i)*time_step, movavr_x[i] ); 
     
 	fclose(fp);
 

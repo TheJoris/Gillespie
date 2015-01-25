@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-#Give project name of KaiModel Gillespie output as only argument.
+# Give project name of KaiModel Gillespie output as only argument.
 # NOT including '.0.' part!
 
 
@@ -10,8 +10,8 @@
 # <project_name>.CB       : KaiC seq. with KaiB.
 # <project_name>.Cfree    : Non sequestered KaiC (norm + inactive, int over p).
 # <project_name>.tmin.Np  : -
-# <project_name>.Puw      : Fraction of hexamers with phosho. level > 0.
-# <project_name>.Pw       : Av. phospho level of hexamers: 1/(6 * CT) sum_i (p * C_p_i).
+# <project_name>.Puw      : Fraction of hexamers with phosho. level > 0. (unweighted)
+# <project_name>.Pw       : Av. phospho level of hexamers: 1/(6 * CT) sum_i (p * C_p_i). (weighted)
 
 $|=1;
 
@@ -121,6 +121,7 @@ for ($p = 0; $p<7; $p++) {
 	      $CA[$p][$t]  = $X[1][$t];
 	      $CB[$p][$t]  = $X[3][$t] + $X[4][$t];
 	      $CAB[$p][$t] = $X[5][$t] + $X[6][$t] + $X[7][$t];
+ 	      $CnAB[$p][$t] = $X[5][$t] + $X[6][$t] + 2 * $X[7][$t];
   }
 }
 
@@ -133,17 +134,19 @@ for ($t = 0; $t < $tt; $t++) {
     $CAT[$t] = $CA[0][$t];
     $CBT[$t] = $CB[0][$t];
     $CABT[$t] = $CAB[0][$t];
+    $CnABT[$t] = $CnAB[0][$t];
     for ($p=1; $p < 7; $p++) {
         $CT[$t]  += $C[$p][$t];
         $CfT[$t] += $Cf[$p][$t];
         $CAT[$t] += $CA[$p][$t];
         $CBT[$t] += $CB[$p][$t];
         $CABT[$t] += $CAB[$p][$t];
+        $CnABT[$t] += $CnAB[$p][$t];
         $Ctest = $CfT[$t] + $CAT[$t] + $CBT[$t] + $CABT[$t];
         $Pw[$t]  += $p * $C[$p][$t];
         $Puw[$t] += $C[$p][$t];
     }
-    print "$t: CT is $CT[$t] or $Ctest; AT is $AT[$t]; BT is $BT[$t]\n";
+    #print "$t: CT is $CT[$t] or $Ctest; AT is $AT[$t]; BT is $BT[$t]\n";
 		if ($CT[$t] > 0){
 	    $Puw[$t] /= $CT[$t];
   	  $Pw [$t] /= (6 * $CT[$t]);
@@ -217,6 +220,13 @@ open(FILE,">$file");
 printf FILE "time - KaiC-KaiB-KaiA \n";
 for ($t=0;$t<$tt;$t++) {
     printf FILE "%f\t%f\t0\n",$T[$0][$t],$CABT[$t];
+}
+
+$file = "$Name.CnAB";
+open(FILE,">$file");
+printf FILE "time - KaiC-KaiB-n*KaiA \n";
+for ($t=0;$t<$tt;$t++) {
+    printf FILE "%f\t%f\t0\n",$T[$0][$t],$CnABT[$t];
 }
 
 $file = "$Name.CT";

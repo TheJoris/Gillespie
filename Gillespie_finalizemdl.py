@@ -59,7 +59,6 @@ if __name__ == '__main__':
         
         if(arithmitic != ''):
             try:
-                print arithmitic             
                 temp_file.write(line.replace(toreplace, str(eval(arithmitic)) ))
             except ValueError:
                 print "No valid arithmitic: %s" %arithmitic

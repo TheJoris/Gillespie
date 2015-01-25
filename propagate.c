@@ -45,20 +45,21 @@ int gdrl;			  //length of the gdr array == number of volume dependent reactions
   @param[in]  total_time    The total time, the run should last
   @param[in]  total_steps   The total number of steps, the run should last
 */
-void run( int run, double total_time, long total_steps )
+void run( double tau_run, double tau_equi, long total_steps )
 {
   int    react, //< next reaction
          i, j;
   long long int   steps; //< number of reaction steps
   double sum_a, //< sum of all propensity functions
          last_volume_update = 0., //< save the last time the volume has updated
-         time; //> temporary variable
+         time, //> temporary variable
+         final_time;
 
   // initialize variables
   sys.tau = sys.tau_init;
   sys.current_gene_copynbr = sys.init_gene_copynbr;
   steps = 0;
-  analyse_init();
+  analyse_init( tau_equi );
   if( sys.output_stats )
     block_init(); // in stats.c
   
@@ -79,7 +80,8 @@ void run( int run, double total_time, long total_steps )
   determine_propensity_functions();
 
   // run until final time or final number of steps is reached
-  while( sys.tau < sys.tau_init + total_time && steps < total_steps )
+  final_time = sys.tau_init + tau_run + tau_equi;
+  while( sys.tau < final_time && steps < total_steps )
   {   
     // check if volume or gene copy number should be updated
     if( HAS_GROWTH && sys.tau >= last_volume_update + growth_dt )
@@ -94,7 +96,12 @@ void run( int run, double total_time, long total_steps )
     
     // advance the step counter and save current status
     steps++;
-    analyse( steps );
+  
+    // Start recording data after eq. time.  
+    if(sys.tau > sys.tau_init + tau_equi)
+      analyse( steps );
+    
+    
     if( sys.output_stats )
       block_acc();
     
@@ -108,7 +115,7 @@ void run( int run, double total_time, long total_steps )
       }
       else
       {
-        printf( "%8.4f time elapsed after %'lld steps. (queuelength: %d, volume: %f)\n", sys.tau, steps, queue_length(), sys.volume );
+        printf( "%8.4f time elapsed after %'lld steps. (queuelength: %d, volume: %f)\n",      sys.tau, steps, queue_length(), sys.volume );
       }
     }
     
@@ -140,8 +147,11 @@ void run( int run, double total_time, long total_steps )
           printf( "The volume is %f\n", sys.volume );
         if( sys.needs_queue )
           printf( "The length of the queue is %d\n", queue_length() );
-        for( i=0; i<sys.Ncomp; ++i  ) 
-          printf( "%d: [%s] is %d\n", i, Xname[i], X[i] );
+        //for( i=0; i<sys.Ncomp; ++i  ) 
+        //  printf( "%d: [%s] is %d\n", i, Xname[i], X[i] );
+        
+        //Write data when sim has finished.
+        analyse_finish(0);
         abort();
       }
     }
@@ -190,7 +200,7 @@ void run( int run, double total_time, long total_steps )
   }
 
   // output statistics about the whole run
-  analyse_finish(run);
+  analyse_finish(0);
   //run_finish(run);
   
   // shift origin of time for the next run to current end
@@ -271,8 +281,7 @@ void update_propensity_functions( int *ids, int len )
       else if( r->HillCoeff < 0 ) 
       {
         // calculate reaction constant for repression 
-        x = pow( r->HillConst, -r->HillCoeff );
-        r->k = r->Hillk * x / ( x + pow( (double) X[r->HillComp] / sys.volume, -r->HillCoeff ) );
+        r->k = r->Hillk / ( 1. + pow( (double) X[r->HillComp] / (sys.volume * r->HillConst), -r->HillCoeff ) );
       }
     }
 
@@ -416,8 +425,8 @@ void growth_init()
   // draw duplication time from Gaussian distribution.
   // Make sure duplication time lies inside the cell cycle time.
   do {
-    ccycle_duptime = doubling_time * sys.duplication_phase + 
-      ran_gaussian( doubling_time * sys.duplication_phase_std ); }
+    ccycle_duptime = sys.doubling_time / (2*sys.init_gene_copynbr) + 
+      ran_gaussian( sys.doubling_time * sys.duplication_period_std ); }
   while ( sys.tau > sys.last_division + ccycle_duptime || ccycle_duptime >= doubling_time ); 
   ccycle_duptime += sys.last_division;
   
@@ -460,7 +469,7 @@ void growth_step()
   
   calculate_volume();
 
-  if( sys.volume >= 2. * volume_min )
+  if( sys.volume > 2. * volume_min )
   {
     // store time of cell division.
     sys.last_division = sys.tau;
@@ -526,6 +535,8 @@ void growth_step()
     // check if genes duplicate.
 	  if( sys.tau >= ccycle_duptime && sys.current_gene_copynbr < 2 * sys.init_gene_copynbr )
 	  {
+	    //First update next duplication time.
+	    ccycle_duptime += sys.doubling_time / sys.init_gene_copynbr;
 	    for( i=0; i<sys.Nreact; ++i )
       {
         if( R[i].HillComp >= 0 )

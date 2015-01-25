@@ -25,9 +25,23 @@ PROJECT_NAME=$1
 #Gillespie_parasub $PARAM_FILE $TEMPL_FILE $MODEL_FILE
 
 #Gillespie_parse $MODEL_FILE > Gillespie.inp
-Gillespie_parse $1".mdl" > Gillespie.inp
-Gillespie
-Gillespie_kaiana $1
+if [ -a ./$PROJECT_NAME'.mtp' ] 
+then
+   Gillespie_parasub $PROJECT_NAME
+   Gillespie_finalizemdl $PROJECT_NAME
+   mv out.temp $PROJECT_NAME'.mdl'
+fi
+
+if [ -a ./$PROJECT_NAME'.mdl' ] 
+then
+  Gillespie_parse $1".mdl" > Gillespie.inp
+  Gillespie #-qtp
+else
+  echo 'No model file found for project:' $PROJECT_NAME
+fi
+
+
+#Gillespie_kaiana $1
 
 #Execute Rustl data-generator file.
 #data_Rust
